@@ -33,6 +33,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
 from sqlalchemy import String, Float, Integer, Boolean
 from src.mock_bloomberg import MockBloomberg
+from src.database import get_engine
 
 
 # ----------------------------------------------------------------
