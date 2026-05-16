@@ -482,6 +482,19 @@ if __name__ == '__main__':
     print('\nLoading positions...')
     load_positions(engine)
 
+    # recreate indexes after to_sql replace
+    with engine.connect() as conn:
+        conn.execute(sa.text(
+            'CREATE INDEX IF NOT EXISTS ix_positions_fund_date_isin '
+            'ON positions (fund_id, date, isin)'
+        ))
+        conn.execute(sa.text(
+            'CREATE INDEX IF NOT EXISTS ix_positions_fund_date '
+            'ON positions (fund_id, date)'
+        ))
+        conn.commit()
+    print('Indexes created.')
+
     # print('\nCreating indexes...')
     # create_indexes(engine)
 
