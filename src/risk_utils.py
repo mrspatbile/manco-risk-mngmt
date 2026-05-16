@@ -1307,7 +1307,6 @@ def stress_ltv(
 # ================================================================
 # Liquidity functions (ESMA34-39-897)
 # ================================================================
-
 def days_to_liquidate(
     positions: pd.DataFrame,
     pct_adv: float = 0.25
@@ -1318,14 +1317,17 @@ def days_to_liquidate(
 
     days_i = market_value_i / (ADV_i * pct_adv)
 
-    Direct properties and private loans: days = infinity
-    since no liquid secondary market exists.
+    Special cases (independent of ADV):
+    - Cash: 0 days (immediate)
+    - FX forwards: 2 days (OTC T+2 settlement)
+    - Listed options/derivatives: 1 day (exchange traded)
+    - Direct properties and private loans: infinity
 
     Parameters
     ----------
     positions : pd.DataFrame
         Positions with columns: market_value_eur, adv_eur,
-        is_direct_property
+        asset_class, sub_asset_class, is_direct_property
     pct_adv : float
         Fraction of ADV tradeable per day. Default 0.25.
 
@@ -1333,17 +1335,12 @@ def days_to_liquidate(
     -------
     pd.DataFrame
         Original positions with added column: days_to_liquidate
-
-    Examples
-    --------
-    >>> positions = days_to_liquidate(positions, pct_adv=0.25)
-    >>> print(positions[['instrument_name', 'days_to_liquidate']])
     """
     df = positions.copy()
 
-    # direct properties and zero ADV: illiquid
+    # default: ADV-based liquidation
     illiquid_mask = (
-        (df.get('is_direct_property', False) == True) |
+        (df.get('is_direct_property', pd.Series(False, index=df.index)) == True) |
         (df['adv_eur'] == 0) |
         (df['adv_eur'].isna())
     )
@@ -1353,6 +1350,20 @@ def days_to_liquidate(
         np.inf,
         df['market_value_eur'].abs() / (df['adv_eur'] * pct_adv)
     )
+
+    # special cases: override ADV-based estimate
+    # cash: immediate
+    df.loc[df['asset_class'] == 'Cash', 'days_to_liquidate'] = 0
+
+    # FX forwards: OTC T+2 settlement
+    df.loc[df['asset_class'] == 'FX', 'days_to_liquidate'] = 2
+
+    # listed options and listed derivatives: exchange traded, 1 day
+    listed_deriv_mask = (
+        (df['asset_class'] == 'Derivative') &
+        (df.get('sub_asset_class', '') == 'Listed Option')
+    )
+    df.loc[listed_deriv_mask, 'days_to_liquidate'] = 1
 
     return df
 
@@ -1391,7 +1402,7 @@ def liquidity_buckets(
     """
     df = positions.copy()
 
-    bins   = [0, 1, 7, 30, 90, 365, np.inf]
+    bins   = [-np.inf, 1, 7, 30, 90, 365, np.inf]    
     labels = [
         '1 day',
         '2-7 days',
