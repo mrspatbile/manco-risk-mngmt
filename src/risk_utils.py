@@ -35,6 +35,36 @@ from scipy import stats
 from scipy.stats import norm, t as student_t
 from typing import Optional
 
+HISTORICAL_SCENARIOS = {
+        '2008': {
+            'name'         : 'GFC 2008 (Sep-Dec 2008)',
+            'delta_equity' : -0.40,
+            'delta_y'      : -0.01,
+            'delta_spread' : 0.03,
+            'fx_shocks'    : {'USD': -0.05, 'GBP': -0.15},
+        },
+        '2011': {
+            'name'         : 'EU Sovereign Debt Crisis 2011 (Jul-Nov 2011)',
+            'delta_equity' : -0.25,
+            'delta_y'      : -0.015,
+            'delta_spread' : 0.02,
+            'fx_shocks'    : {'USD': 0.15, 'GBP': 0.02},
+        },
+        '2020': {
+            'name'         : 'Covid 2020 (Feb-Mar 2020)',
+            'delta_equity' : -0.30,
+            'delta_y'      : -0.005,
+            'delta_spread' : 0.02,
+            'fx_shocks'    : {'USD': 0.05, 'GBP': -0.05},
+        },
+        '2022': {
+            'name'         : 'Rate shock 2022 (Jan-Dec 2022)',
+            'delta_equity' : -0.20,
+            'delta_y'      : 0.03,
+            'delta_spread' : 0.015,
+            'fx_shocks'    : {'USD': 0.10, 'GBP': -0.05},
+        },
+    }
 
 # ================================================================
 # VaR functions
@@ -1056,29 +1086,7 @@ def stress_historical(
     --------
     >>> result = stress_historical(positions, scenario='2008')
     """
-    scenarios = {
-        '2008': {
-            'name'         : 'GFC 2008 (Sep-Dec 2008)',
-            'delta_equity' : -0.40,
-            'delta_y'      : -0.01,
-            'delta_spread' : 0.03,
-            'fx_shocks'    : {'USD': -0.05, 'GBP': -0.15},
-        },
-        '2020': {
-            'name'         : 'Covid 2020 (Feb-Mar 2020)',
-            'delta_equity' : -0.30,
-            'delta_y'      : -0.005,
-            'delta_spread' : 0.02,
-            'fx_shocks'    : {'USD': 0.05, 'GBP': -0.05},
-        },
-        '2022': {
-            'name'         : 'Rate shock 2022 (Jan-Dec 2022)',
-            'delta_equity' : -0.20,
-            'delta_y'      : 0.03,
-            'delta_spread' : 0.015,
-            'fx_shocks'    : {'USD': 0.10, 'GBP': -0.05},
-        },
-    }
+    scenarios = HISTORICAL_SCENARIOS
 
     if scenario not in scenarios:
         raise ValueError(
@@ -1634,6 +1642,7 @@ def liquidity_adjusted_var(
 # ================================================================
 
 __all__ = [
+    'HISTORICAL_SCENARIOS',
     # VaR
     'var_historical',
     'var_parametric',
