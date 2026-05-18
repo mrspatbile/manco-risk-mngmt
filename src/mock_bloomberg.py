@@ -50,7 +50,11 @@ class MockBloomberg:
     # Fields: PX_LAST, DUR_ADJ_MID, CONVEXITY, YLD_YTM_MID,
     #         BETA, VOLUME_AVG_20D, EQY_DVD_YLD_IND,
     #         CRNCY, ASSET_CLASS, RTG_SP, RTG_MOODY,
-    #         CPN, MATURITY, AMT_OUTSTANDING, Z_SPRD_MID
+    #         CPN, MATURITY, AMT_OUTSTANDING, Z_SPRD_MID,
+    #         DELTA, GAMMA, VEGA, THETA, OPT_UNDL_PX,
+    #         CONTRACT_SIZE, IMPLIED_VOL,
+    #         ESG_SCORE, ENV_SCORE, SOC_SCORE, GOV_SCORE,
+    #         CONTROVERSY_FLAG, CARBON_INTENSITY, ESG_LOOK_THROUGH
     # ----------------------------------------------------------------
 
     _reference_data = {
