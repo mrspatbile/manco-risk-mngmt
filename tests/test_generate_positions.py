@@ -7,6 +7,7 @@ Run with: python3 -m pytest tests/test_generate_positions.py -v
 
 import pytest
 import pandas as pd
+import numpy as np
 import os
 from src.generate_positions import (
     generate_hedge_fund,
@@ -382,3 +383,50 @@ class TestMarketValueComputation:
             (real_estate['date'] == real_estate['date'].max())
         ].iloc[0]
         assert abs(direct['market_value_local'] - direct['price']) < 1.0
+
+
+class TestESGFields:
+
+    def test_illiquid_loan_has_esg_score(self):
+        df = generate_private_debt()
+        acuris = df[df['isin'] == 'XS9876543210'].iloc[0]
+        assert acuris['esg_score'] == 38
+
+    def test_illiquid_loan_ineos_controversy(self):
+        df = generate_private_debt()
+        ineos = df[df['isin'] == 'XS9876543212'].iloc[0]
+        assert ineos['controversy_flag'] == True
+
+    def test_direct_property_has_esg(self):
+        df = generate_real_estate()
+        office = df[df['isin'] == 'PROP_LU_001'].iloc[0]
+        assert office['esg_score'] == 72
+
+    def test_direct_property_has_carbon_intensity(self):
+        df = generate_real_estate()
+        office = df[df['isin'] == 'PROP_LU_001'].iloc[0]
+        assert office['carbon_intensity'] == 85.2
+
+
+    def test_liquid_instrument_esg_none(self):
+        df = generate_private_debt()
+        telecom = df[df['isin'] == 'XS2341234567'].iloc[0]
+        assert pd.isna(telecom['esg_score'])
+
+    def test_clo_esg_none(self):
+        df = generate_private_debt()
+        clo = df[df['isin'] == 'XS1122334455'].iloc[0]
+        assert pd.isna(clo['esg_score'])
+
+    def test_cash_esg_none(self):
+        df = generate_private_debt()
+        cash = df[df['isin'] == 'CASH_EUR_002'].iloc[0]
+        assert pd.isna(cash['esg_score'])
+
+
+    def test_esg_columns_present_all_funds(self):
+        for df in [generate_hedge_fund(), generate_private_debt(),
+                   generate_real_estate(), generate_ucits_balanced()]:
+            for col in ['esg_score', 'env_score', 'soc_score',
+                        'gov_score', 'controversy_flag', 'carbon_intensity']:
+                assert col in df.columns

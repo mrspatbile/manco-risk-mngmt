@@ -167,6 +167,13 @@ class Position(Base):
     valuation_date      : Mapped[str]   = mapped_column(String, nullable=True)
     is_direct_property  : Mapped[bool]  = mapped_column(Boolean, nullable=True)
     is_hedge            : Mapped[bool]  = mapped_column(Boolean, nullable=True)
+    # ESG scores
+    esg_score           : Mapped[float] = mapped_column(Float, nullable=True)
+    env_score           : Mapped[float] = mapped_column(Float, nullable=True)
+    soc_score           : Mapped[float] = mapped_column(Float, nullable=True)
+    gov_score           : Mapped[float] = mapped_column(Float, nullable=True)
+    controversy_flag    : Mapped[bool]  = mapped_column(Boolean, nullable=True)
+    carbon_intensity    : Mapped[float] = mapped_column(Float, nullable=True)
 
 # ----------------------------------------------------------------
 # Database functions

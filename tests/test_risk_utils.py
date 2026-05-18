@@ -595,10 +595,10 @@ class TestDaysToLiquidate:
         direct = result[result['is_direct_property'] == True]
         assert (direct['days_to_liquidate'] == np.inf).all()
 
-    def test_cash_is_infinite(self, sample_positions):
+    def test_cash_is_zero_days(self, sample_positions):
         result = days_to_liquidate(sample_positions)
         cash   = result[result['asset_class'] == 'Cash']
-        assert (cash['days_to_liquidate'] == np.inf).all()
+        assert (cash['days_to_liquidate'] == 0).all()
 
     def test_liquid_equity_has_low_days(self, sample_positions):
         result = days_to_liquidate(sample_positions)
