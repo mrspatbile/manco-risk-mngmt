@@ -230,6 +230,7 @@ def generate_cash_flows(valuation_reports: list = None,
             r for r in valuation_reports
             if r['company_id'] == cid and r['date'] <= exit_date
         ]
+
         if company_reports:
             latest = max(company_reports, key=lambda r: r['date'])
             exit_nav_lookup[cid] = latest['appraised_nav_eur']
@@ -406,6 +407,8 @@ def generate_fund_cash_management(valuation_reports: list = None) -> list:
 
     records = []
 
+    mgmt_fee_semi = round(COMMITTED * MGMT_FEE_RATE / 2, 0)
+
     for i, quarter in enumerate(quarters):
         q_start = quarters[i - 1] + pd.Timedelta(days=1) if i > 0 else pd.Timestamp('2018-04-01')
         q_end   = quarter
@@ -421,25 +424,58 @@ def generate_fund_cash_management(valuation_reports: list = None) -> list:
         # capital calls this quarter (delayed LP funding, not investment date)
         calls_q     = flows_in_quarter(q_start, q_end, ['capital_call'])
         total_calls = sum(abs(f['amount_eur']) for f in calls_q)
-
-        # distributions received this quarter -- increase cash
-        dists_q = flows_in_quarter(q_start, q_end,
-                                   ['distribution', 'exit_proceeds'])
-        total_dists = sum(f['amount_eur'] for f in dists_q)
-
+        
         # management fees paid this quarter
-        fees_q = flows_in_quarter(q_start, q_end, ['management_fee'])
-        total_fees = sum(abs(f['amount_eur']) for f in fees_q)
+        fees_q      = flows_in_quarter(q_start, q_end, ['management_fee'])
+        total_fees  = sum(abs(f['amount_eur']) for f in fees_q)
 
-        # update cash balance
+        # upcoming fees: next 4 quarters = 2 semi-annual payments
+        next_4q_fees = mgmt_fee_semi * 2
+
+        # gross exit proceeds this quarter from appraisal (before waterfall)
+        exited_this_q   = [
+            c for c in COMPANIES
+            if c.get('exit_date')
+            and q_start <= pd.Timestamp(c['exit_date']) <= q_end
+        ]
+  
+        exit_proceeds_q = 0.0
+        for c in exited_this_q:
+            company_reports = [
+                r for r in valuation_reports
+                if r['company_id'] == c['company_id']
+                and r['date'] <= c['exit_date']
+            ]
+
+            if company_reports:
+                latest = max(company_reports, key=lambda r: r['date'])
+                exit_proceeds_q += latest['appraised_nav_eur']
+        
+
+        # retain enough to cover next 4 quarters fees, distribute the rest
+        if exit_proceeds_q > 0:
+            retained    = min(next_4q_fees, exit_proceeds_q)
+            distributed = exit_proceeds_q - retained
+
+        else:
+            retained    = 0.0
+            distributed = 0.0
+
+
+        # interim distributions paid out this quarter
+        dist_flows_q = flows_in_quarter(q_start, q_end, ['distribution'])
+        total_dists  = sum(f['amount_eur'] for f in dist_flows_q) + distributed
+
         cash_balance = (
             cash_balance
-            - total_calls        # equity checks paid
-            - total_fees         # management fees paid
-            + total_dists        # distributions received
-            + total_calls        # LP capital arriving to repay sub line
+            # + total_calls          # LP capital arriving # hsiis it not included bcs we are using to repay subline
+            # + retained             # retained from exit proceeds
+            - total_draws          # investments via sub line
+            - total_fees           # management fees paid
+            - total_dists          # distributions paid to LPs
         )
-        cash_balance = max(0, cash_balance)
+        cash_balance = max(0, cash_balance) + retained 
+
 
         # interest earned on average cash balance (quarterly)
         interest_earned = cash_balance * CASH_RATE / 4
