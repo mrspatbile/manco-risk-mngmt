@@ -803,7 +803,7 @@ def positions():
          'market_value_eur': 1_000_000, 'beta': 1.2, 'dur_adj_mid': float('nan')},
         {'isin': 'BD1', 'asset_class': 'Bond',   'currency': 'EUR',
          'market_value_eur': 500_000,   'beta': float('nan'), 'dur_adj_mid': 4.0},
-        {'isin': 'FX1', 'asset_class': 'Equity', 'currency': 'USD',
+        {'isin': 'FX1', 'asset_class': 'FX', 'currency': 'USD',
          'market_value_eur': 200_000,   'beta': float('nan'), 'dur_adj_mid': float('nan')},
     ])
 
