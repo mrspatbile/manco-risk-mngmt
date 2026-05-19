@@ -25,7 +25,7 @@ This is not a production system. It is a structured investigation -- intentional
 
 ## What is coming next (in order)
 
-1. **Data refactor** -- move hardcoded data out of src files (fund positions, yfinance/BBG mapping, ESG info, mock 3rd party company entry/exit data) into a proper data layer. This is not yet a Linear ticket but should be the next one created.
+1. **Data refactor** (MRS-82) -- move hardcoded data out of src files (fund positions, yfinance/BBG mapping, ESG info, mock 3rd party company entry/exit data) into `reference_data/`.
 2. **Pre-trade authorization and limits** -- there is already a Linear ticket for this.
 3. **Newer regulatory topics** -- will reuse the new data architecture once it is in place.
 4. **Dashboards** -- for internal consumption (board and risk committee) and for the regulatory supervisor (CSSF-facing).
