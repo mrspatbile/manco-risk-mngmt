@@ -799,12 +799,12 @@ class TestVarMonteCarlo:
 @pytest.fixture
 def positions():
     return pd.DataFrame([
-        {'isin': 'EQ1', 'asset_class': 'Equity', 'currency': 'EUR',
-         'market_value_eur': 1_000_000, 'beta': 1.2, 'dur_adj_mid': float('nan')},
-        {'isin': 'BD1', 'asset_class': 'Bond',   'currency': 'EUR',
-         'market_value_eur': 500_000,   'beta': float('nan'), 'dur_adj_mid': 4.0},
-        {'isin': 'FX1', 'asset_class': 'FX', 'currency': 'USD',
-         'market_value_eur': 200_000,   'beta': float('nan'), 'dur_adj_mid': float('nan')},
+        {'date': pd.Timestamp('2025-01-02'), 'isin': 'EQ1', 'asset_class': 'Equity',
+         'currency': 'EUR', 'market_value_eur': 1_000_000, 'beta': 1.2, 'dur_adj_mid': float('nan')},
+        {'date': pd.Timestamp('2025-01-02'), 'isin': 'BD1', 'asset_class': 'Bond',
+         'currency': 'EUR', 'market_value_eur': 500_000, 'beta': float('nan'), 'dur_adj_mid': 4.0},
+        {'date': pd.Timestamp('2025-01-02'), 'isin': 'FX1', 'asset_class': 'FX',
+         'currency': 'USD', 'market_value_eur': 200_000, 'beta': float('nan'), 'dur_adj_mid': float('nan')},
     ])
 
 @pytest.fixture
@@ -822,40 +822,40 @@ def pnl_actual():
     )
 
 
-# class TestComputePnlAttribution:
+class TestComputePnlAttribution:
 
-#     def test_returns_dataframe(self, positions, market_moves, pnl_actual):
-#         result = compute_pnl_attribution(positions, market_moves, pnl_actual)
-#         assert isinstance(result, pd.DataFrame)
+    def test_returns_dataframe(self, positions, market_moves, pnl_actual):
+        result = compute_pnl_attribution(positions, market_moves, pnl_actual)
+        assert isinstance(result, pd.DataFrame)
 
-#     def test_required_columns(self, positions, market_moves, pnl_actual):
-#         result = compute_pnl_attribution(positions, market_moves, pnl_actual)
-#         for col in ['pnl_actual', 'pnl_equity', 'pnl_rates', 'pnl_fx',
-#                     'pnl_explained', 'pnl_residual', 'pct_explained']:
-#             assert col in result.columns
+    def test_required_columns(self, positions, market_moves, pnl_actual):
+        result = compute_pnl_attribution(positions, market_moves, pnl_actual)
+        for col in ['pnl_actual', 'pnl_equity', 'pnl_rates', 'pnl_fx',
+                    'pnl_explained', 'pnl_residual', 'pct_explained']:
+            assert col in result.columns
 
-#     def test_equity_pnl(self, positions, market_moves, pnl_actual):
-#         result = compute_pnl_attribution(positions, market_moves, pnl_actual)
-#         assert result['pnl_equity'].iloc[0] == pytest.approx(12_000.0, rel=1e-4)
+    def test_equity_pnl(self, positions, market_moves, pnl_actual):
+        result = compute_pnl_attribution(positions, market_moves, pnl_actual)
+        assert result['pnl_equity'].iloc[0] == pytest.approx(12_000.0, rel=1e-4)
 
-#     def test_rates_pnl(self, positions, market_moves, pnl_actual):
-#         result = compute_pnl_attribution(positions, market_moves, pnl_actual)
-#         assert result['pnl_rates'].iloc[0] == pytest.approx(-1_000.0, rel=1e-4)
+    def test_rates_pnl(self, positions, market_moves, pnl_actual):
+        result = compute_pnl_attribution(positions, market_moves, pnl_actual)
+        assert result['pnl_rates'].iloc[0] == pytest.approx(-1_000.0, rel=1e-4)
 
-#     def test_fx_pnl(self, positions, market_moves, pnl_actual):
-#         result = compute_pnl_attribution(positions, market_moves, pnl_actual)
-#         assert result['pnl_fx'].iloc[0] == pytest.approx(1_000.0, rel=1e-4)
+    def test_fx_pnl(self, positions, market_moves, pnl_actual):
+        result = compute_pnl_attribution(positions, market_moves, pnl_actual)
+        assert result['pnl_fx'].iloc[0] == pytest.approx(1_000.0, rel=1e-4)
 
-#     def test_residual_equals_actual_minus_explained(self, positions, market_moves, pnl_actual):
-#         result = compute_pnl_attribution(positions, market_moves, pnl_actual)
-#         row = result.iloc[0]
-#         assert row['pnl_residual'] == pytest.approx(
-#             row['pnl_actual'] - row['pnl_explained'], rel=1e-4
-#         )
+    def test_residual_equals_actual_minus_explained(self, positions, market_moves, pnl_actual):
+        result = compute_pnl_attribution(positions, market_moves, pnl_actual)
+        row = result.iloc[0]
+        assert row['pnl_residual'] == pytest.approx(
+            row['pnl_actual'] - row['pnl_explained'], rel=1e-4
+        )
 
-#     def test_pct_explained(self, positions, market_moves, pnl_actual):
-#         result = compute_pnl_attribution(positions, market_moves, pnl_actual)
-#         # explained = 12,000, actual = 14,000 -> 85.7%
-#         assert result['pct_explained'].iloc[0] == pytest.approx(
-#             12_000 / 14_000, rel=1e-4
-#         )
+    def test_pct_explained(self, positions, market_moves, pnl_actual):
+        result = compute_pnl_attribution(positions, market_moves, pnl_actual)
+        # explained = 12,000, actual = 14,000 -> 85.7%
+        assert result['pct_explained'].iloc[0] == pytest.approx(
+            12_000 / 14_000, rel=1e-4
+        )
