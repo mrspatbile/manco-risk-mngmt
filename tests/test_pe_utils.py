@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from src.pe_utils import (
     xirr, fund_irr, pe_multiples,
-    pe_multiples_by_company, pe_multiples_timeseries
+    pe_multiples_by_company, pe_multiples_timeseries, pe_value_bridge
 )
 from src.database import get_engine
 
@@ -167,3 +167,63 @@ class TestPeMultiplesTimeseries:
     def test_tvpi_nonnegative(self):
         result = pe_multiples_timeseries(ENGINE, FUND_ID)
         assert (result['tvpi'] >= 0).all()
+
+
+class TestPeValueBridge:
+
+    def test_returns_expected_keys(self):
+        result = pe_value_bridge(ENGINE, FUND_ID)
+        assert 'rows' in result
+        assert 'fund_totals' in result
+
+    def test_rows_not_empty(self):
+        result = pe_value_bridge(ENGINE, FUND_ID)
+        assert len(result['rows']) > 0
+
+    def test_required_row_keys(self):
+        result = pe_value_bridge(ENGINE, FUND_ID)
+        required = [
+            'company_id', 'company_name', 'is_realised', 'cost_basis',
+            'ebitda_growth', 'multiple_expansion', 'leverage_effect',
+            'distributions', 'total_attributed', 'actual_value_created',
+            'reconciliation_gap', 'reconciliation_gap_pct',
+        ]
+        for row in result['rows']:
+            for key in required:
+                assert key in row, f"Missing key '{key}' in row"
+
+    def test_total_attributed_equals_sum_of_components(self):
+        result = pe_value_bridge(ENGINE, FUND_ID)
+        for row in result['rows']:
+            expected = (
+                row['ebitda_growth']
+                + row['multiple_expansion']
+                + row['leverage_effect']
+                + row['distributions']
+            )
+            assert abs(row['total_attributed'] - expected) < 1e-2
+
+    def test_reconciliation_gap_near_zero_for_exited(self):
+        result = pe_value_bridge(ENGINE, FUND_ID)
+        for row in result['rows']:
+            if row['is_realised']:
+                assert abs(row['reconciliation_gap_pct']) < 0.10, (
+                    f"{row['company_name']}: gap {row['reconciliation_gap_pct']:.1%} "
+                    f"exceeds 10% for exited company"
+                )
+
+    def test_fund_totals_keys_present(self):
+        ft = pe_value_bridge(ENGINE, FUND_ID)['fund_totals']
+        for col in ['ebitda_growth', 'multiple_expansion', 'leverage_effect',
+                    'distributions', 'total_attributed', 'actual_value_created']:
+            assert f'{col}_eur' in ft
+            assert f'{col}_pct' in ft
+
+    def test_single_company_returns_one_row(self):
+        result_all = pe_value_bridge(ENGINE, FUND_ID)
+        if not result_all['rows']:
+            pytest.skip("No rows returned for fund")
+        first_cid = result_all['rows'][0]['company_id']
+        result_one = pe_value_bridge(ENGINE, FUND_ID, company_id=first_cid)
+        assert len(result_one['rows']) == 1
+        assert result_one['rows'][0]['company_id'] == first_cid
