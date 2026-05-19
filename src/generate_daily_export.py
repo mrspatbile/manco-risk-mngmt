@@ -25,7 +25,7 @@ FUNDS = {
     'UCITS_Balanced'  : 'fund_positions_UCITS_Balanced.xlsx',
 }
 
-DATES = ['2026-05-13', '2026-05-12']  # today and yesterday
+DATES = ['2026-05-13', '2026-05-12']  # VALUATION DATE and THE DAY BEFORE for testing purposes
 
 
 if __name__ == '__main__':
