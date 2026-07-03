@@ -50,21 +50,24 @@ src/
 ├── reporting/
 ├── data/
 ├── risk/
-└── ui/
+├── ui/
+└── tools/
 ```
 
 ### `src/computation/`
 
 Raw calculations only.
 
-Examples:
+Current modules:
 
 ```text
-var.py
-stress.py
-liquidity.py
-leverage.py
-attribution.py
+var.py                      # VaR, Expected Shortfall (historical and parametric)
+stress.py                   # Stress testing and scenario analysis
+liquidity.py                # Liquidity profiling and bucket classification
+liquidity_calibration.py    # Liquidity weight calibration
+leverage.py                 # Leverage calculation (notional, gross, net)
+attribution.py              # P&L attribution by position and factor
+derivatives.py              # Derivative exposure and Greeks computation
 ```
 
 These modules should not perform database writes, file exports, notebook rendering, or regulatory interpretation.
@@ -73,13 +76,18 @@ These modules should not perform database writes, file exports, notebook renderi
 
 Reusable workflows that orchestrate data loading, enrichment, and computation.
 
-Examples:
+Current pipelines:
 
 ```text
-risk_snapshot.py
+fixed_position_var.py           # VaR pipeline for position-based funds
+liquidity_policy.py             # Liquidity profiling and calibration workflow
+lmt_trigger_analysis.py         # LMT trigger evaluation for UCITS
+validate.py                     # Pipeline input validation and data quality checks
 ```
 
 Pipelines should produce raw or structured outputs. They should not silently impose fund-specific regulatory rules unless that is explicitly in scope.
+
+See `src/pipeline/README.md` for detailed pipeline documentation.
 
 ### `src/reporting/`
 
@@ -90,6 +98,8 @@ Examples:
 ```text
 board_report.py
 annex_iv.py
+annex_iv_export.py
+annex_iv_workflow.py
 ```
 
 Regulatory interpretation belongs here or in dedicated regulatory workflow modules, not inside raw computation.
@@ -98,25 +108,53 @@ Regulatory interpretation belongs here or in dedicated regulatory workflow modul
 
 Database access, mock Bloomberg, enrichment, generated data helpers, and reference-data loading helpers.
 
-Examples:
+Current modules:
 
 ```text
-database.py
-mock_bloomberg.py
-enrichment.py
-generate_positions.py
-generate_pe_fund.py
-generate_infra_fund.py
-setup_db.py
+database.py                 # SQLAlchemy ORM models and DB creation
+setup_db.py                 # Idempotent database initialization
+load_fund_metadata.py       # Fund metadata loading from reference data
+load_positions.py           # Position data loading from Excel
+enrichment.py               # Position enrichment (Bloomberg sensitivities, ESG)
+mock_bloomberg.py           # Simulated market data and sensitivities
+generate_positions.py       # Generate position Excel files for liquid funds
+generate_pe_fund.py         # Generate PE portfolio company data
+generate_infra_fund.py      # Generate infrastructure asset data
+reference_data.py           # Loaders for reference data JSON files
+benchmark_builder.py        # Reference portfolio loading
+operational_checks.py       # Data quality and validation checks
+generate_daily_export.py    # Fund-admin export simulation
+paths.py                    # Data path utilities
 ```
 
 ### `src/risk/`
 
-Risk aggregation, compliance orchestration, and functions not yet cleanly moved to computation.
+Risk aggregation, compliance orchestration, and asset-class-specific workflows.
 
-`risk_utils.py` may continue to exist as a compatibility and orchestration layer. Aggregation and summary functions that extract and format computation results (e.g., `compute_var_monitoring_summary()`) belong here.
+**General-purpose:**
+- `risk_utils.py` — risk aggregation and monitoring summaries
+- `var_backtest.py` — VaR backtesting and exception reporting
 
-Do not move remaining coupled functions unless a ticket explicitly asks for it.
+**UCITS-specific regulatory workflows:**
+- `ucits_var_monitoring.py` — UCITS VaR monitoring and limits
+- `ucits_relative_var.py` — tracking error and relative VaR
+- `ucits_srri.py` — Summary Risk Indicator (PRIIPs KID)
+- `ucits_stress_scenarios.py` — UCITS stress testing
+
+**Asset-class helpers:**
+- `pe_utils.py` — private equity NAV projection, cash flows, covenant analysis
+- `infra_utils.py` — infrastructure covenant monitoring, refinancing risk
+- `esg_utils.py` — ESG score aggregation, SFDR PAI metrics
+
+**Leverage monitoring:**
+- `leverage_config.py` — AIFMD leverage classification mapping
+- `leverage_computation.py` — leverage calculation and policy checks
+
+**Other:**
+- `pnl_attribution.py` — P&L decomposition by component
+- `reg_constants.py` — regulatory thresholds and classification mappings
+
+See `src/risk/README.md` for detailed module documentation and guidance on adding new functions.
 
 ### `src/ui/`
 
@@ -129,37 +167,69 @@ display_dark_table()
 display_var_es()
 display_ucits_monthly_report()
 plot_var_backtest()
+plot_liquidity_buckets()
+plot_attribution()
+annex_iv_display.py         # Annex IV report formatting
 ```
 
 Display functions take computed results and render them as styled HTML tables or charts for notebooks.
 
+### `src/tools/`
+
+Data maintenance and utility scripts.
+
+Current tools:
+
+```text
+clean_data_outputs.py       # Safe cleanup of regenerated data folders
+```
+
+These are operational utilities, not part of the core workflow.
+
 ## Current notebook structure direction
 
-Use purpose-based folders:
+Organize notebooks by content domain and audience:
 
 ```text
 notebooks/
-├── fund_risk_monitoring/
-├── regulatory_reporting/
-├── investor_disclosures/
-├── governance_reporting/
-└── data_workflows/
+├── data_workflows/              # Data access and validation (technical)
+│   ├── 01_data_layer_workflow.ipynb
+│   └── 02_operational_checks.ipynb
+├── funds/                       # Fund-level risk monitoring (per fund)
+│   ├── aifm_hedge_fund.ipynb
+│   ├── aifm_pe_buyout.ipynb
+│   ├── aifm_infra_fund.ipynb
+│   ├── aifm_private_debt.ipynb
+│   ├── aifm_real_estate.ipynb
+│   └── ucits_balanced.ipynb
+├── liquidity_management/        # LMT mechanics and stress testing
+│   └── liquidity_management.ipynb
+├── portfolio_management/        # Portfolio analysis notebooks
+│   └── *.ipynb
+└── reports/                     # Governance and regulatory reporting
+    ├── board_risk_report.ipynb
+    └── ucits_priips_kid.ipynb
 ```
 
-Do not use:
+**`data_workflows/`** contains technical notebooks explaining:
+- Database access and structure
+- Mock Bloomberg / market data loading
+- Position enrichment workflow
+- Reference data loaders
+- How data flows into the computation layer
 
-```text
-internal_risk/
-exploratory/
-```
+**`funds/`** contains fund-level risk monitoring notebooks organized by fund ID (not regulatory category). Each notebook demonstrates:
+- Daily risk snapshot for a fund
+- VaR, liquidity, and leverage monitoring (where applicable)
+- Stress testing and scenario analysis
+- Regulatory compliance checks (UCITS or AIFMD)
 
-Use `data_workflows/` for technical notebooks that explain:
+**`reports/`** contains governance and reporting outputs:
+- Board risk report
+- PRIIPs KID and investor disclosures
+- Regulatory filings (AIFMD Annex IV)
 
-- database access
-- mock Bloomberg / market data
-- enrichment
-- reference data
-- how data feeds the computation layer
+Future notebooks should follow this pattern: start with `data_workflows/` to understand the data layer, then explore fund-specific notebooks.
 
 ## Static valuation date
 
