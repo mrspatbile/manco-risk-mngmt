@@ -27,9 +27,10 @@ def fetch_derivative_market_inputs(
     bloomberg_ticker: str,
     bbg,
     cache: dict | None = None,
+    contract_type: str | None = None,
 ) -> dict:
     """
-    Fetch DELTA, OPT_UNDL_PX, CONTRACT_SIZE from Bloomberg for a derivative.
+    Fetch DELTA, OPT_UNDL_PX/PX_LAST, CONTRACT_SIZE from Bloomberg for a derivative.
 
     Supports optional per-run cache to avoid repeated fetches of the same
     ticker within a single portfolio calculation.
@@ -37,19 +38,21 @@ def fetch_derivative_market_inputs(
     Parameters
     ----------
     bloomberg_ticker : str
-        Bloomberg ticker (e.g., 'SPXW 260619P05500 Index', 'SPY US Equity')
+        Bloomberg ticker (e.g., 'SPXW 260619P05500 Index', 'SPY US Equity', 'EURUSD Curncy')
     bbg : MockBloomberg or BloombergAPI
         Bloomberg data provider
     cache : dict, optional
         Running cache {ticker: market_inputs_dict}. Modified in-place.
+    contract_type : str, optional
+        'future', 'option', or 'forward'. Used to select appropriate price field.
 
     Returns
     -------
     dict with keys:
         delta : float or None
-            Hedge ratio (None if not available or not applicable)
+            Hedge ratio (None if not available or not applicable to futures/forwards)
         underlying_price : float
-            OPT_UNDL_PX or equivalent spot/forward price
+            OPT_UNDL_PX (options), PX_LAST (spot/forward)
         contract_size : float
             CONTRACT_SIZE (multiplier). Defaults to 1 if not found.
         ccy : str
@@ -70,11 +73,16 @@ def fetch_derivative_market_inputs(
     # Fetch from Bloomberg
     bd = bbg.bdp(
         bloomberg_ticker,
-        ['DELTA', 'OPT_UNDL_PX', 'CONTRACT_SIZE', 'CRNCY']
+        ['DELTA', 'OPT_UNDL_PX', 'PX_LAST', 'CONTRACT_SIZE', 'CRNCY']
     )
 
     delta = bd.loc[bloomberg_ticker, 'DELTA']
+
+    # For options, use OPT_UNDL_PX; for futures/forwards, use PX_LAST (spot/forward price)
     underlying_price = bd.loc[bloomberg_ticker, 'OPT_UNDL_PX']
+    if pd.isna(underlying_price):
+        underlying_price = bd.loc[bloomberg_ticker, 'PX_LAST']
+
     contract_size = bd.loc[bloomberg_ticker, 'CONTRACT_SIZE']
     ccy = bd.loc[bloomberg_ticker, 'CRNCY']
 
@@ -306,7 +314,7 @@ def compute_derivative_exposures_portfolio(
                 f"Derivative {isin} has no bloomberg_ticker; cannot fetch market inputs"
             )
 
-        market_inputs = fetch_derivative_market_inputs(bbg_ticker, bbg, cache=bbg_cache)
+        market_inputs = fetch_derivative_market_inputs(bbg_ticker, bbg, cache=bbg_cache, contract_type=contract_type)
         delta = market_inputs.get('delta')
         underlying_price = market_inputs.get('underlying_price')
 

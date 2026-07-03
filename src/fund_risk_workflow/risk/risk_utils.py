@@ -371,11 +371,26 @@ def _ptc_reference_var() -> float:
 
 
 def _ptc_issuer_exposure(pro_forma: pd.DataFrame, nav: float) -> pd.Series:
-    """Issuer exposure as % of NAV. Uses 'issuer' column if present, else 'isin'."""
-    key = 'issuer' if 'issuer' in pro_forma.columns else 'isin'
+    """
+    Issuer exposure as % of NAV. Corporate issuer / single-name concentration.
+
+    Excludes derivatives (FX forwards, index futures/options) which are not
+    corporate issuers. Only includes direct positions with issuer metadata
+    (equities, bonds, loans, CLOs) and single-name derivatives if explicit
+    issuer look-through exists.
+
+    Uses 'issuer' column if present, else 'isin'.
+    """
+    # Filter to non-derivative positions (corporate issuers only)
+    issuer_universe = pro_forma[pro_forma['asset_class'] != 'Derivative']
+
+    if len(issuer_universe) == 0:
+        return pd.Series(dtype=float)
+
+    key = 'issuer' if 'issuer' in issuer_universe.columns else 'isin'
     return (
-        pro_forma
-        .groupby(pro_forma[key].fillna(pro_forma['isin']))['market_value_eur']
+        issuer_universe
+        .groupby(issuer_universe[key].fillna(issuer_universe['isin']))['market_value_eur']
         .sum() / nav * 100
     )
 
@@ -582,8 +597,10 @@ def _check_aifm_hf(
     else:
         sector_universe = pro_forma[pro_forma['asset_class'] == 'Equity']
 
+    # Sector concentration: net sector weight as % of NAV
+    # Uses signed market_value_eur (preserves long/short balance per sector)
     sector_exp = (
-        sector_universe.groupby('sector')['market_value_eur'].sum().abs() / nav * 100
+        sector_universe.groupby('sector')['market_value_eur'].sum() / nav * 100
     ) if len(sector_universe) else pd.Series(dtype=float)
 
     # Compute pre-trade sector exposure for comparison
@@ -596,8 +613,10 @@ def _check_aifm_hf(
     else:
         pre_sector_universe = positions_before[positions_before['asset_class'] == 'Equity'] if positions_before is not None else None
 
+    # Pre-trade sector concentration: net sector weight as % of NAV
+    # Uses signed market_value_eur (preserves long/short balance per sector)
     pre_sector_exp = (
-        pre_sector_universe.groupby('sector')['market_value_eur'].sum().abs() / nav * 100
+        pre_sector_universe.groupby('sector')['market_value_eur'].sum() / nav * 100
     ) if (pre_sector_universe is not None and len(pre_sector_universe)) else pd.Series(dtype=float)
 
     metrics['max_sector_pct'] = float(sector_exp.max()) if len(sector_exp) else 0.0
@@ -854,8 +873,9 @@ def pre_trade_check(
             ]
         else:
             _pre_sector_universe = positions[positions['asset_class'] == 'Equity']
+        # Pre-trade net sector weights as % of NAV (signed, preserves long/short balance)
         _pre_sector_exp = (
-            _pre_sector_universe.groupby('sector')['market_value_eur'].sum().abs() / nav * 100
+            _pre_sector_universe.groupby('sector')['market_value_eur'].sum() / nav * 100
         ) if len(_pre_sector_universe) else pd.Series(dtype=float)
 
         # Pre-trade net short
@@ -920,8 +940,9 @@ def pre_trade_check(
             pro_forma['sector'].notna() &
             (pro_forma['sector'] != 'Government')
         ]
+        # Net sector weights as % of NAV (signed, preserves long/short balance)
         sector_exp_post = (
-            sector_universe_post.groupby('sector')['market_value_eur'].sum().abs() / nav_post * 100
+            sector_universe_post.groupby('sector')['market_value_eur'].sum() / nav_post * 100
         ) if len(sector_universe_post) else pd.Series(dtype=float)
         sector_exposures_post = sector_exp_post[sector_exp_post > 0].round(1).to_dict()
 
@@ -930,8 +951,9 @@ def pre_trade_check(
             positions['sector'].notna() &
             (positions['sector'] != 'Government')
         ]
+        # Net sector weights as % of NAV (signed, preserves long/short balance)
         sector_exp_pre = (
-            sector_universe_pre.groupby('sector')['market_value_eur'].sum().abs() / nav * 100
+            sector_universe_pre.groupby('sector')['market_value_eur'].sum() / nav * 100
         ) if len(sector_universe_pre) else pd.Series(dtype=float)
         sector_exposures_pre = sector_exp_pre[sector_exp_pre > 0].round(1).to_dict()
 

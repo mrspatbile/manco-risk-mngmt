@@ -74,16 +74,17 @@ class TestESGDerivativeExposure:
         assert abs(opt_exposure - expected) < tolerance, \
             f"OPT_SPX_PUT_001 exposure {opt_exposure:.0f} != expected {expected:.0f}"
 
-    def test_future_exposure_uses_market_value(self, setup):
+    def test_future_exposure_uses_delta_adjusted_notional(self, setup):
         """
-        Test FUT_SPY_SHORT_001 exposure.
+        Test FUT_SPY_SHORT_001 ESG exposure after Phase B/D reclassification.
 
-        Note: Futures are stored as Equity in the database, not as Derivative.
-        Therefore, they use market_value_eur, not delta-adjusted notional.
-        This is expected behavior until futures are reclassified as Derivative.
+        After Phase B, futures are classified as asset_class="Derivative".
+        After Phase D, ESG exposure for equity derivatives uses delta-adjusted notional
+        instead of market_value_eur. This is economically more sound.
         """
         esg_df = setup['esg_df']
         risk_df = setup['risk_df']
+        bbg = MockBloomberg()
 
         # Find future in ESG data
         fut_rows = esg_df[esg_df['instrument_name'].str.contains('S&P 500 Future', na=False)]
@@ -91,26 +92,57 @@ class TestESGDerivativeExposure:
 
         fut_exposure = fut_rows.iloc[0]['esg_exposure_eur']
 
-        # Current behavior: futures are Equity, so ESG exposure = abs(market_value_eur)
-        fut_pos = risk_df[risk_df['instrument_name'].str.contains('S&P 500 Future', na=False)]
-        expected = abs(fut_pos.iloc[0]['market_value_eur'])
+        # After Phase D: equity derivatives use delta-adjusted notional for ESG weighting
+        from fund_risk_workflow.computation.derivatives import compute_derivative_exposures_portfolio
+        from fund_risk_workflow.data.reference_data import load_derivative_contracts
+        from fund_risk_workflow.data.database import query_positions
+
+        engine = get_engine()
+        raw_pos = query_positions(engine, 'AIFM_HedgeFund', VALUATION_DATE)
+        ticker_map = dict(zip(raw_pos['isin'], raw_pos['bloomberg_ticker']))
+
+        deriv_subset = risk_df[risk_df['asset_class'] == 'Derivative'].copy()
+        deriv_subset['bloomberg_ticker'] = deriv_subset['isin'].map(ticker_map)
+
+        deriv_contracts = load_derivative_contracts()
+        helper_result = compute_derivative_exposures_portfolio(
+            deriv_subset, bbg, deriv_contracts
+        )
+
+        # ESG exposure should be abs(delta_adjusted_notional) from helper
+        fut_helper = helper_result['by_position'][
+            helper_result['by_position']['isin'] == 'FUT_SPY_SHORT_001'
+        ]
+        assert len(fut_helper) > 0
+        expected = abs(fut_helper.iloc[0]['delta_adjusted_notional_eur'])
 
         tolerance = 1.0
         assert abs(fut_exposure - expected) < tolerance, \
-            f"FUT_SPY_SHORT_001 exposure {fut_exposure:.0f} != expected {expected:.0f}"
+            f"FUT_SPY_SHORT_001 ESG exposure {fut_exposure:.0f} != expected {expected:.0f}"
 
     def test_esg_exposure_is_positive(self, setup):
-        """Test that ESG exposures are always positive (absolute values)."""
+        """Test that ESG exposures are always non-negative."""
         esg_df = setup['esg_df']
 
         # All ESG exposures should be >= 0
         assert (esg_df['esg_exposure_eur'] >= 0).all(), \
             "ESG exposures should always be non-negative"
 
-        # Derivatives should have positive exposure
+        # Equity derivatives should have positive exposure; FX derivatives should be zero
         derivs = esg_df[esg_df['asset_class'] == 'Derivative']
-        assert (derivs['esg_exposure_eur'] > 0).all(), \
-            "All derivative ESG exposures should be positive"
+        from fund_risk_workflow.data.reference_data import load_derivative_contracts
+        deriv_contracts = load_derivative_contracts()
+
+        for _, deriv in derivs.iterrows():
+            isin = deriv['isin']
+            if isin in deriv_contracts:
+                underlying_class = deriv_contracts[isin].get('underlying_asset_class', '')
+                if underlying_class == 'Equity':
+                    assert deriv['esg_exposure_eur'] > 0, \
+                        f"{isin} (Equity derivative) should have positive ESG exposure"
+                elif underlying_class == 'FX':
+                    assert deriv['esg_exposure_eur'] == 0, \
+                        f"{isin} (FX derivative) should have zero ESG exposure"
 
     def test_hedge_derivative_included_in_esg(self, setup):
         """Test that hedge derivatives are included in ESG weighting (unlike leverage)."""

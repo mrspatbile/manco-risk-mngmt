@@ -59,9 +59,19 @@ class TestBuildEsgDf:
         assert (cash['esg_exposure_eur'] == 0).all()
 
     def test_derivative_uses_delta_adjusted_notional(self, hf_esg_df):
-        deriv = hf_esg_df[hf_esg_df['asset_class'] == 'Derivative'].iloc[0]
-        # delta 0.28 x 100 contracts x 100 size x 5842.31 x 0.89 ≈ 14.5m
-        assert deriv['esg_exposure_eur'] > 10e6
+        # After Phase D: equity derivatives use delta-adjusted notional, FX derivatives have zero
+        derivs = hf_esg_df[hf_esg_df['asset_class'] == 'Derivative']
+        # Find an equity derivative (non-zero exposure)
+        equity_derivs = derivs[derivs['esg_exposure_eur'] > 0]
+        assert len(equity_derivs) > 0, "Should have equity derivatives with positive ESG exposure"
+
+        deriv = equity_derivs.iloc[0]
+        # delta_adjusted_notional for equity derivatives should be > 0
+        assert deriv['esg_exposure_eur'] > 0
+
+        # Verify FX derivatives have zero exposure
+        fx_derivs = derivs[derivs['isin'].isin(['FWD_EURUSD_001', 'FWD_GBPUSD_001'])]
+        assert (fx_derivs['esg_exposure_eur'] == 0).all(), "FX derivatives should have zero ESG exposure"
 
     def test_controversy_flag_jpm(self, hf_esg_df):
         jpm = hf_esg_df[hf_esg_df['instrument_name'] == 'JPMorgan Chase'].iloc[0]

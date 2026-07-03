@@ -14,10 +14,10 @@ Never deletes:
   - data/yf_cache/
 
 Usage:
-  python3 scripts/clean_data_outputs.py
+  python3 -m fund_risk_workflow.tools.clean_data_outputs
     → Dry-run: print folders that would be deleted
 
-  python3 scripts/clean_data_outputs.py --confirm
+  python3 -m fund_risk_workflow.tools.clean_data_outputs --confirm
     → Actually delete the folders
 
 Safety:
@@ -31,9 +31,12 @@ import sys
 import shutil
 from pathlib import Path
 
-# Resolve project root from script location
-SCRIPT_DIR = Path(__file__).parent  # scripts/
-PROJECT_ROOT = SCRIPT_DIR.parent  # project root
+# Resolve project root from module location
+# src/fund_risk_workflow/tools/clean_data_outputs.py -> project root
+MODULE_DIR = Path(__file__).parent  # tools/
+FUND_RISK_WORKFLOW_DIR = MODULE_DIR.parent  # fund_risk_workflow/
+SRC_DIR = FUND_RISK_WORKFLOW_DIR.parent  # src/
+PROJECT_ROOT = SRC_DIR.parent  # project root
 DATA_DIR = PROJECT_ROOT / 'data'
 
 # Folders to clean (regenerated outputs only)
@@ -90,7 +93,7 @@ def dry_run():
         print("  No folders found to clean.")
 
     print("\nTo confirm deletion, run:")
-    print("  python3 scripts/clean_data_outputs.py --confirm")
+    print("  python3 -m fund_risk_workflow.tools.clean_data_outputs --confirm")
 
 
 def confirm_delete():
@@ -127,7 +130,7 @@ def main():
             sys.exit(0 if success else 1)
         else:
             print(f"Unknown option: {sys.argv[1]}")
-            print("Usage: python3 scripts/clean_data_outputs.py [--confirm]")
+            print("Usage: python3 -m fund_risk_workflow.tools.clean_data_outputs [--confirm]")
             sys.exit(1)
     else:
         dry_run()

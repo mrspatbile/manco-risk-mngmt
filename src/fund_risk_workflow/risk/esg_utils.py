@@ -60,9 +60,9 @@ def build_esg_df(
 
     For liquid instruments: ESG data fetched from Bloomberg via bdp.
     For illiquid instruments: ESG data from fund admin embedded in positions.
-    For derivatives: delta-adjusted notional used as ESG exposure weight.
-    For futures: full notional used (delta = 1).
-    For FX: no ESG exposure assigned.
+    For equity derivatives: delta-adjusted notional used as ESG exposure weight.
+    For FX derivatives: zero ESG exposure (not ESG-relevant).
+    For futures: full notional used (delta = 1) if underlying is Equity.
 
     Parameters
     ----------
@@ -87,6 +87,7 @@ def build_esg_df(
     raw_positions = query_positions(engine, fund_id, position_date=position_date)
     ticker_map    = dict(zip(raw_positions['isin'],
                              raw_positions['bloomberg_ticker']))
+    deriv_contracts = load_derivative_contracts()  # Load once, use in loop
     esg_rows = []
 
     for _, pos in risk_df.iterrows():
@@ -109,9 +110,20 @@ def build_esg_df(
             for f in ESG_FIELDS:
                 row[f.lower()] = pos.get(f.lower())
 
-        # ESG exposure: delta-adjusted for derivatives, full notional otherwise
+        # ESG exposure: delta-adjusted for derivatives with ESG-relevant underlyings, full notional otherwise
         if pos['asset_class'] == 'Derivative':
-            row['esg_exposure_eur'] = None  # Will be filled by helper
+            # Check underlying asset class: only Equity derivatives contribute to ESG
+            isin = pos['isin']
+            if isin in deriv_contracts:
+                underlying_class = deriv_contracts[isin].get('underlying_asset_class', '')
+                if underlying_class == 'Equity':
+                    row['esg_exposure_eur'] = None  # Will be filled by helper (delta-adjusted)
+                else:
+                    # FX or other non-ESG-relevant underlying
+                    row['esg_exposure_eur'] = 0.0
+            else:
+                # Unknown derivative: zero ESG exposure
+                row['esg_exposure_eur'] = 0.0
         elif pos['asset_class'] == 'FX':
             row['esg_exposure_eur'] = 0.0
         elif pos['asset_class'] == 'Cash':
@@ -139,7 +151,8 @@ def build_esg_df(
             for _, exp_row in helper_result['by_position'].iterrows():
                 isin = exp_row['isin']
                 esg_row = next((r for r in esg_rows if r.get('isin') == isin), None)
-                if esg_row:
+                if esg_row and esg_row.get('esg_exposure_eur') is None:
+                    # Only set exposure for derivatives marked for helper fill (Equity derivatives)
                     # Use absolute value of delta-adjusted notional for ESG weighting
                     esg_row['esg_exposure_eur'] = abs(exp_row['delta_adjusted_notional_eur'])
 

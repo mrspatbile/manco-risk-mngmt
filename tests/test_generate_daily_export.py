@@ -9,10 +9,37 @@ import pytest
 import pandas as pd
 from pathlib import Path
 import sys
+import subprocess
 
 ROOT_DIR   = Path(__file__).parent.parent
 DATA_DIR   = ROOT_DIR / 'data'
 sys.path.insert(0, str(ROOT_DIR / 'src'))
+
+
+@pytest.fixture(scope="session", autouse=True)
+def generate_daily_exports():
+    """Generate daily export files before running tests."""
+    # Run the export generation script
+    result = subprocess.run(
+        [sys.executable, '-m', 'fund_risk_workflow.data.generate_daily_export'],
+        cwd=str(ROOT_DIR),
+        capture_output=True,
+        text=True
+    )
+
+    if result.returncode != 0:
+        pytest.fail(
+            f"Failed to generate daily exports: {result.stderr}"
+        )
+
+    # Verify that exports directory was created
+    export_dir = DATA_DIR / 'daily_exports'
+    assert export_dir.exists(), "Daily exports directory was not created"
+
+    yield
+
+    # Cleanup is optional - we could remove exports after tests, but
+    # keeping them for inspection is more useful
 
 from fund_risk_workflow.data.paths import daily_export_file
 
@@ -111,6 +138,23 @@ class TestDailyExportFiles:
         if path.exists():
             df = pd.read_excel(path)
             assert (df['market_value_eur'] >= 0).all()
+
+    def test_hedge_fund_includes_derivatives(self):
+        """After Phase B, derivatives should be included in exports."""
+        path = self._get_export_path('AIFM_HedgeFund', '2026-03-31')
+        if path.exists():
+            df = pd.read_excel(path)
+            # Verify Derivative asset class is present
+            assert 'Derivative' in df['asset_class'].values, \
+                "Derivatives should be included in AIFM Hedge Fund export"
+
+            # Verify sub_asset_class is preserved for derivatives
+            derivs = df[df['asset_class'] == 'Derivative']
+            assert len(derivs) > 0
+            # Check that sub_asset_class values are correct
+            valid_sub_classes = {'Future', 'Forward', 'Listed Option'}
+            assert derivs['sub_asset_class'].isin(valid_sub_classes).all(), \
+                "Derivative sub_asset_class should be Future/Forward/Listed Option"
 
     def test_daily_export_matches_full_history(self):
         """Filtering full history to single date = daily export."""

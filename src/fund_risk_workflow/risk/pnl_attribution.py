@@ -124,7 +124,12 @@ def compute_daily_attribution(
     ]
 
     # ── Attribution ──────────────────────────────────────────────────────────
-    attr = compute_pnl_attribution(pos_history_aln, market_moves_aln, pnl_aligned)
+    from fund_risk_workflow.data.reference_data import load_derivative_contracts
+
+    deriv_contracts = load_derivative_contracts()
+    attr = compute_pnl_attribution(
+        pos_history_aln, market_moves_aln, pnl_aligned, deriv_contracts=deriv_contracts
+    )
 
     # ── Model quality ────────────────────────────────────────────────────────
     resid_vol = attr['pnl_residual'].std()

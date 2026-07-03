@@ -315,10 +315,15 @@ class TestQueryAssetClassBreakdown:
             engine, 'UCITS_Balanced', '2026-03-31')
         assert abs(result['weight_pct'].sum() - 100.0) < 1.0
 
-    def test_hedge_fund_has_negative_weights(self, engine):
+    def test_hedge_fund_breakdown_includes_derivatives(self, engine):
         result = query_asset_class_breakdown(
             engine, 'AIFM_HedgeFund', '2026-03-31')
-        assert (result['weight_pct'] < 0).any()
+        # After Phase B, derivatives are classified as asset_class='Derivative'
+        # and should appear in the breakdown with non-zero weight
+        assert 'Derivative' in result['asset_class'].values
+        deriv_row = result[result['asset_class'] == 'Derivative']
+        assert len(deriv_row) == 1
+        assert abs(deriv_row.iloc[0]['weight_pct']) > 0
 
 
 class TestQueryLargestPositions:

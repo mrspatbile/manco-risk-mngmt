@@ -16,6 +16,8 @@
 | --- | --- |
 | AIFM Hedge Fund Long/Short | VaR, Expected Shortfall, backtesting, stress testing, liquidity monitoring, leverage monitoring |
 | UCITS Balanced | VaR, SRI, PRIIPs KID example, eligibility checks, LMT mechanics |
+| Liquidity and LMT mechanics | 
+Redemption pressure, liquid asset coverage, gate triggers, swing-pricing trigger, deferred redemption backlog | 
 
 
 ## Example outputs

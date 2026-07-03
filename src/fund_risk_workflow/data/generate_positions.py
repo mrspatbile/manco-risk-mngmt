@@ -53,6 +53,11 @@ with open(_REF_DIR / 'instruments' / 'esg_scores.json') as _f:
     # Handle schema_version wrapper
     _ESG = {k: v for k, v in _data.items() if k != 'schema_version'} if isinstance(_data, dict) and 'schema_version' in _data else _data
 
+# Load derivative contracts for economic asset class lookup
+with open(_REF_DIR / 'derivatives' / 'derivative_contracts.json') as _f:
+    _deriv_data = json.load(_f)
+    _DERIV_CONTRACTS = _deriv_data.get('contracts', {})
+
 
 # ----------------------------------------------------------------
 # Helper functions
@@ -141,9 +146,22 @@ def make_positions_df(rows: list, dates: pd.DatetimeIndex) -> pd.DataFrame:
             # bonds, loans, CLOs: price is per 100 face value
             if asset_class in ('Bond', 'Loan', 'CLO'):
                 mv_local = quantities * price / 100
-            # options: price is per share, contract size = 100
+            # Derivatives: market_value_eur is display-only. Use economic asset class
+            # for valuation. Notional exposure comes from derivative_contracts + helper.
             elif asset_class == 'Derivative':
-                mv_local = quantities * price * 100
+                isin = row['isin']
+                deriv_contract = _DERIV_CONTRACTS.get(isin)
+                if deriv_contract:
+                    underlying_class = deriv_contract.get('underlying_asset_class', 'Equity')
+                else:
+                    underlying_class = 'Equity'  # fallback
+                # For options: still use lot size, but for futures/forwards: treat as economic asset
+                sub_asset_class = row.get('sub_asset_class', '')
+                if sub_asset_class == 'Listed Option':
+                    mv_local = quantities * price * 100
+                else:
+                    # Futures/forwards: use price * qty for display (economic valuation)
+                    mv_local = quantities * price
             else:
                 mv_local = price * quantities
 

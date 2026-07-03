@@ -11,15 +11,97 @@ no database access, file I/O, or external services.
 Functions
 ---------
     compute_pnl_attribution()   Daily P&L attribution by risk factor
+    resolve_economic_risk_bucket()  Map position to economic risk factor bucket
 """
 
 import pandas as pd
+
+
+def resolve_economic_risk_bucket(
+    row: dict,
+    deriv_contracts: dict | None = None,
+) -> str:
+    """
+    Map any position (equity, bond, derivative, fx, cash) to economic risk factor bucket.
+
+    After Phase B reclassification, derivatives are `asset_class="Derivative"`.
+    This function resolves their economic underlying to the correct attribution bucket.
+
+    Parameters
+    ----------
+    row : dict
+        Position record with keys: asset_class, isin, currency (str)
+    deriv_contracts : dict, optional
+        Loaded from reference_data.load_derivative_contracts()
+        Maps {isin: contract_dict}. If None, derivatives map to Residual.
+
+    Returns
+    -------
+    str
+        Economic risk factor bucket: 'Equity', 'Rates', 'FX', or 'Residual'
+
+    Logic
+    -----
+    Non-derivatives:
+      - 'Equity' → 'Equity'
+      - 'Bond', 'Loan', 'CLO' → 'Rates'
+      - 'FX' → 'FX'
+      - 'Cash', other → 'Residual'
+
+    Derivatives:
+      - Look up isin in deriv_contracts
+      - Map underlying_asset_class:
+        - 'Equity' → 'Equity'
+        - 'FX' → 'FX'
+        - 'Rates', 'Fixed Income' → 'Rates'
+        - other → 'Residual'
+      - If isin not found: 'Residual'
+    """
+    asset_class = str(row.get('asset_class', '')).strip()
+
+    # Non-derivatives: direct mapping
+    if asset_class != 'Derivative':
+        if asset_class == 'Equity':
+            return 'Equity'
+        elif asset_class in ('Bond', 'Loan', 'CLO'):
+            return 'Rates'
+        elif asset_class == 'FX':
+            return 'FX'
+        else:
+            return 'Residual'
+
+    # Derivatives: look up underlying asset class
+    if asset_class == 'Derivative':
+        if not deriv_contracts:
+            # No derivative contracts metadata available
+            return 'Residual'
+
+        isin = str(row.get('isin', '')).strip()
+        if isin not in deriv_contracts:
+            # Derivative not found in reference data
+            return 'Residual'
+
+        contract = deriv_contracts[isin]
+        underlying_class = contract.get('underlying_asset_class', '').strip()
+
+        if underlying_class == 'Equity':
+            return 'Equity'
+        elif underlying_class == 'FX':
+            return 'FX'
+        elif underlying_class in ('Rates', 'Fixed Income'):
+            return 'Rates'
+        else:
+            return 'Residual'
+
+    # Fallback
+    return 'Residual'
 
 
 def compute_pnl_attribution(
     positions_history_df: pd.DataFrame,
     market_moves_df: pd.DataFrame,
     pnl_actual_series: pd.Series,
+    deriv_contracts: dict | None = None,
 ) -> pd.DataFrame:
     """
     Sensitivity-based daily P&L attribution.
@@ -49,6 +131,10 @@ def compute_pnl_attribution(
         Example columns: 'r_market', 'dy', 'r_fx_USD', 'r_fx_GBP'
     pnl_actual_series : pd.Series
         Daily actual P&L in EUR, indexed by date.
+    deriv_contracts : dict, optional
+        Loaded from reference_data.load_derivative_contracts().
+        Maps {isin: contract_dict}. Used to resolve derivative economic asset class.
+        If None, derivatives map to Residual.
 
     Returns
     -------
@@ -66,7 +152,7 @@ def compute_pnl_attribution(
     Examples
     --------
     >>> result = compute_pnl_attribution(
-    ...     positions_history_df, market_moves_df, pnl_series
+    ...     positions_history_df, market_moves_df, pnl_series, deriv_contracts
     ... )
     >>> print(result)
     """
@@ -95,19 +181,21 @@ def compute_pnl_attribution(
         for _, pos in pos_today.iterrows():
             mv         = float(pos['market_value_eur'])
             ccy        = str(pos.get('currency', BASE_CCY)).upper()
-            asset_class= str(pos.get('asset_class', '')).strip()
 
-            if asset_class == 'Equity':
+            # Resolve economic risk bucket (handles both regular and derivative assets)
+            bucket = resolve_economic_risk_bucket(pos, deriv_contracts)
+
+            if bucket == 'Equity':
                 beta = pos.get('beta')
                 if pd.notna(beta) and beta != 0:
                     pnl_equity += float(beta) * mv * r_market
 
-            if asset_class == 'Bond':
+            if bucket == 'Rates':
                 dur = pos.get('dur_adj_mid')
                 if pd.notna(dur) and dur != 0:
                     pnl_rates += -float(dur) * dy * mv
 
-            if ccy != BASE_CCY and asset_class in ('FX', 'Bond'):
+            if ccy != BASE_CCY and bucket in ('FX', 'Rates'):
                 fx_col = f'r_fx_{ccy}'
                 r_fx   = float(moves.get(fx_col, 0.0))
                 pnl_fx += mv * r_fx
