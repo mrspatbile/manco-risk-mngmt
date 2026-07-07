@@ -15,8 +15,8 @@ Required coverage (MRS-83):
 import os
 import pytest
 import pandas as pd
-from src.data.database import get_engine
-from src.reporting.annex_iv import build_annex_iv, export_annex_iv_excel
+from fund_risk_workflow.data.database import get_engine
+from fund_risk_workflow.reporting.annex_iv import build_annex_iv, export_annex_iv_excel
 
 ENGINE  = get_engine()
 QUARTER = '2026-03-31'
@@ -99,7 +99,7 @@ class TestBuildAnnexIvHf:
         assert abs(last - 100.0) < 0.5
 
     def test_liquidity_bucket_labels(self, rpt):
-        from src.config import LIQUIDITY_BUCKET_ORDER
+        from fund_risk_workflow.config import LIQUIDITY_BUCKET_ORDER
         assert rpt['liquidity_buckets']['bucket'].tolist() == LIQUIDITY_BUCKET_ORDER
 
     def test_hf_highly_liquid(self, rpt):
@@ -128,6 +128,13 @@ class TestBuildAnnexIvPd:
 
     def test_nav_positive(self, rpt):
         assert rpt['_nav'] > 0
+
+    def test_identification_is_closed_ended(self, rpt):
+        row = rpt['identification'].loc[
+            rpt['identification']['field'] == 'Redemption frequency',
+            'value',
+        ]
+        assert row.iloc[0] == 'Closed-ended — no periodic redemption'
 
     def test_liquidity_buckets_six_rows(self, rpt):
         """MRS-83: liquidity section must be populated."""
@@ -169,6 +176,13 @@ class TestBuildAnnexIvRe:
 
     def test_nav_positive(self, rpt):
         assert rpt['_nav'] > 0
+
+    def test_identification_is_closed_ended(self, rpt):
+        row = rpt['identification'].loc[
+            rpt['identification']['field'] == 'Redemption frequency',
+            'value',
+        ]
+        assert row.iloc[0] == 'Closed-ended — no periodic redemption'
 
     def test_liquidity_buckets_six_rows(self, rpt):
         """MRS-83: liquidity section must be populated."""
@@ -310,6 +324,50 @@ class TestBuildAnnexIvInfra:
 
 
 # ================================================================
+# Scoped workflow display
+# ================================================================
+
+def test_workflow_displays_only_explicit_closed_end_sections(monkeypatch):
+    from fund_risk_workflow.reporting import annex_iv_workflow
+
+    report = {
+        'identification': pd.DataFrame({'field': ['Fund'], 'value': ['PD']}),
+        'breakdown': pd.DataFrame({'Category': ['Loan'], 'NAV (EUR)': [1]}),
+        'leverage_detail': pd.DataFrame({'item': ['Gross'], 'value': ['1.0x']}),
+        'liquidity_buckets': pd.DataFrame({'bucket': ['1 day']}),
+    }
+    displayed = []
+    monkeypatch.setattr(
+        annex_iv_workflow.annex_iv,
+        'build_annex_iv',
+        lambda *args, **kwargs: report,
+    )
+    monkeypatch.setattr(
+        annex_iv_workflow.annex_display,
+        'annex_iv_section',
+        lambda _report, section, **kwargs: displayed.append(section),
+    )
+    monkeypatch.setattr(
+        annex_iv_workflow.annex_iv,
+        'export_annex_iv_excel',
+        lambda *args, **kwargs: 'mock.xlsx',
+    )
+
+    sections = ('identification', 'breakdown', 'leverage_detail')
+    result = annex_iv_workflow.run(
+        engine=None,
+        fund_id='AIFM_PrivateDebt',
+        quarter=QUARTER,
+        first_export_id='25',
+        sections=sections,
+    )
+
+    assert displayed == list(sections)
+    assert [name for name, _ in result['sections']] == list(sections)
+    assert 'liquidity_buckets' not in displayed
+
+
+# ================================================================
 # Excel export
 # ================================================================
 
@@ -333,9 +391,10 @@ class TestExportAnnexIvExcel:
 
     def test_quarter_in_filename(self):
         path = export_annex_iv_excel(ENGINE, quarter=QUARTER, output_dir='data')
-        # Filename uses quarterly format (e.g., 2026Q1) not date format
+        # Quarter format (e.g., 2026Q1) now appears in directory path, not filename
         from datetime import datetime
         quarter_date = datetime.strptime(QUARTER, '%Y-%m-%d')
         quarter_num = (quarter_date.month - 1) // 3 + 1
         quarter_formatted = f'{quarter_date.year}Q{quarter_num}'
-        assert quarter_formatted in os.path.basename(path)
+        # Check full path includes quarter in directory structure
+        assert quarter_formatted in path

@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "companies": [
+    {
+      "company_id": "PE_001",
+      "company_name": "TechCo Solutions",
+      "sector": "Technology",
+      "country": "DE",
+      "investment_stage": "Buyout",
+      "status": "Active",
+      "investment_date": "2018-06-15",
+      "entry_ev_ebitda": 11.5,
+      "entry_ev_sales": null,
+      "ownership_pct": 65.0
+    },
+    {
+      "company_id": "PE_002",
+      "company_name": "MedDevice AG",
+      "sector": "Healthcare",
+      "country": "CH",
+      "investment_stage": "Buyout",
+      "status": "Active",
+      "investment_date": "2019-03-20",
+      "entry_ev_ebitda": 13.2,
+      "entry_ev_sales": null,
+      "ownership_pct": 55.0
+    },
+    {
+      "company_id": "PE_003",
+      "company_name": "Logistics Plus",
+      "sector": "Industrials",
+      "country": "NL",
+      "investment_stage": "Buyout",
+      "status": "Exited",
+      "investment_date": "2018-11-01",
+      "entry_ev_ebitda": 9.8,
+      "entry_ev_sales": null,
+      "ownership_pct": 70.0,
+      "exit_date": "2023-06-30"
+    },
+    {
+      "company_id": "PE_004",
+      "company_name": "RetailGroup France",
+      "sector": "Consumer",
+      "country": "FR",
+      "investment_stage": "Buyout",
+      "status": "Active",
+      "investment_date": "2019-09-15",
+      "entry_ev_ebitda": 8.5,
+      "entry_ev_sales": null,
+      "ownership_pct": 80.0
+    },
+    {
+      "company_id": "PE_005",
+      "company_name": "EnergyTrans GmbH",
+      "sector": "Energy Transition",
+      "country": "DE",
+      "investment_stage": "Growth",
+      "status": "Active",
+      "investment_date": "2020-04-01",
+      "entry_ev_ebitda": 12.0,
+      "entry_ev_sales": null,
+      "ownership_pct": 45.0
+    },
+    {
+      "company_id": "PE_006",
+      "company_name": "FinTech Nordic",
+      "sector": "Financial Services",
+      "country": "SE",
+      "investment_stage": "Growth",
+      "status": "Active",
+      "investment_date": "2021-01-15",
+      "entry_ev_ebitda": null,
+      "entry_ev_sales": 2.5,
+      "ownership_pct": 40.0
+    },
+    {
+      "company_id": "PE_007",
+      "company_name": "FoodCo Benelux",
+      "sector": "Consumer",
+      "country": "BE",
+      "investment_stage": "Buyout",
+      "status": "Exited",
+      "investment_date": "2019-06-01",
+      "entry_ev_ebitda": 9.2,
+      "entry_ev_sales": null,
+      "ownership_pct": 75.0,
+      "exit_date": "2024-03-31"
+    },
+    {
+      "company_id": "PE_008",
+      "company_name": "SoftwareHub UK",
+      "sector": "Technology",
+      "country": "GB",
+      "investment_stage": "Buyout",
+      "status": "Active",
+      "investment_date": "2022-03-01",
+      "entry_ev_ebitda": 14.8,
+      "entry_ev_sales": null,
+      "ownership_pct": 60.0
+    }
+  ]
+}

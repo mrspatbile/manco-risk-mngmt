@@ -8,7 +8,7 @@ Run with: python3 -m pytest tests/test_mock_bloomberg.py -v
 import pytest
 import numpy as np
 import pandas as pd
-from src.data.mock_bloomberg import MockBloomberg
+from fund_risk_workflow.data.mock_bloomberg import MockBloomberg
 
 
 @pytest.fixture

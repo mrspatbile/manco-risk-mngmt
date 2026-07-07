@@ -7,12 +7,12 @@ Run with: python3 -m pytest tests/test_pe_utils.py -v
 import pytest
 import numpy as np
 import pandas as pd
-from src.risk.pe_utils import (
+from fund_risk_workflow.risk.pe_utils import (
     xirr, fund_irr, pe_multiples,
     pe_multiples_by_company, pe_multiples_timeseries, pe_value_bridge,
     pme_long_nickels,
 )
-from src.data.database import get_engine
+from fund_risk_workflow.data.database import get_engine
 
 ENGINE   = get_engine()
 FUND_ID  = 'AIFM_PE_Buyout'

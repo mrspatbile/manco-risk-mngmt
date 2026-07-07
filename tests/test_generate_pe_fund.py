@@ -6,7 +6,7 @@ Run with: python3 -m pytest tests/test_generate_pe_fund.py -v
 """
 import pytest
 import pandas as pd
-from src.data.generate_pe_fund import (
+from fund_risk_workflow.data.generate_pe_fund import (
     generate_cash_flows, generate_nav_history,
     generate_valuation_reports, COMPANIES
 )
@@ -143,7 +143,7 @@ class TestLiquidationFloor:
 
     def test_nav_never_below_liquidation_floor(self):
         """No company NAV should ever drop below its liquidation value."""
-        from src.data.generate_pe_fund import LIQUIDATION_VALUE
+        from fund_risk_workflow.data.generate_pe_fund import LIQUIDATION_VALUE
         reports = generate_valuation_reports()
         for r in reports:
             floor = LIQUIDATION_VALUE[r['company_id']]
@@ -154,7 +154,7 @@ class TestLiquidationFloor:
 
     def test_distressed_retail_above_floor(self):
         """PE_004 in late years should sit at or just above liquidation value, not zero."""
-        from src.data.generate_pe_fund import LIQUIDATION_VALUE
+        from fund_risk_workflow.data.generate_pe_fund import LIQUIDATION_VALUE
         reports = generate_valuation_reports()
         pe004_late = [
             r for r in reports
@@ -169,7 +169,7 @@ class TestGenerateCashFlowsWaterfall:
 
     def test_capital_calls_derived_not_hardcoded(self):
         """Capital calls must match compute_entry_equity_check() for each company."""
-        from src.data.generate_pe_fund import compute_entry_equity_check
+        from fund_risk_workflow.data.generate_pe_fund import compute_entry_equity_check
         flows = generate_cash_flows()
         initial_calls = [
             f for f in flows
@@ -185,7 +185,7 @@ class TestGenerateCashFlowsWaterfall:
 
     def test_management_fees_derived_from_committed(self):
         """Management fees must equal 1.75% of committed p.a., semi-annual."""
-        from src.data.generate_pe_fund import COMMITTED, MGMT_FEE_RATE
+        from fund_risk_workflow.data.generate_pe_fund import COMMITTED, MGMT_FEE_RATE
         flows = generate_cash_flows()
         fees = [f for f in flows if f['flow_type'] == 'management_fee']
         expected_semi = round(COMMITTED * MGMT_FEE_RATE / 2, 0)
@@ -213,7 +213,7 @@ class TestGenerateCashFlowsWaterfall:
 
     def test_carried_interest_is_twenty_percent_of_profits(self):
         """GP carry must be approximately 20% of profits above hurdle."""
-        from src.data.generate_pe_fund import CARRY_RATE
+        from fund_risk_workflow.data.generate_pe_fund import CARRY_RATE
         flows = generate_cash_flows()
         carry_flows = [f for f in flows if f['flow_type'] == 'carried_interest']
         exit_flows  = [f for f in flows if f['flow_type'] == 'exit_proceeds']
@@ -238,7 +238,7 @@ class TestGenerateCashFlowsWaterfall:
 
     def test_total_committed_covers_deployment(self):
         """Total capital calls must not exceed committed capital."""
-        from src.data.generate_pe_fund import COMMITTED
+        from fund_risk_workflow.data.generate_pe_fund import COMMITTED
         flows = generate_cash_flows()
         total_called = sum(
             abs(f['amount_eur']) for f in flows
@@ -261,14 +261,14 @@ class TestGenerateCashFlowsWaterfall:
 class TestGenerateFundCashManagement:
 
     def test_returns_list(self):
-        from src.data.generate_pe_fund import generate_fund_cash_management
+        from fund_risk_workflow.data.generate_pe_fund import generate_fund_cash_management
         val_reports = generate_valuation_reports()
         result = generate_fund_cash_management(val_reports)
         assert isinstance(result, list)
         assert len(result) > 0
 
     def test_all_quarters_present(self):
-        from src.data.generate_pe_fund import generate_fund_cash_management
+        from fund_risk_workflow.data.generate_pe_fund import generate_fund_cash_management
         val_reports = generate_valuation_reports()
         result = generate_fund_cash_management(val_reports)
         dates = [r['cash_management_date'] for r in result]
@@ -276,7 +276,7 @@ class TestGenerateFundCashManagement:
         assert '2026-03-31' in dates
 
     def test_cash_balance_non_negative(self):
-        from src.data.generate_pe_fund import generate_fund_cash_management
+        from fund_risk_workflow.data.generate_pe_fund import generate_fund_cash_management
         val_reports = generate_valuation_reports()
         result = generate_fund_cash_management(val_reports)
         for r in result:
@@ -284,7 +284,7 @@ class TestGenerateFundCashManagement:
                 f"Negative cash balance on {r['cash_management_date']}: {r['cash_balance_eur']:,.0f}"
 
     def test_sub_line_within_limit(self):
-        from src.data.generate_pe_fund import generate_fund_cash_management, SUB_LINE_PCT, COMMITTED
+        from fund_risk_workflow.data.generate_pe_fund import generate_fund_cash_management, SUB_LINE_PCT, COMMITTED
         val_reports = generate_valuation_reports()
         result = generate_fund_cash_management(val_reports)
         limit = COMMITTED * SUB_LINE_PCT
@@ -293,19 +293,19 @@ class TestGenerateFundCashManagement:
                 f"Sub line {r['sub_line_drawn']/1e6:.1f}M exceeds limit {limit/1e6:.1f}M on {r['cash_management_date']}"
 
     def test_cumulative_interest_earned_positive(self):
-        from src.data.generate_pe_fund import generate_fund_cash_management
+        from fund_risk_workflow.data.generate_pe_fund import generate_fund_cash_management
         val_reports = generate_valuation_reports()
         result = generate_fund_cash_management(val_reports)
         assert result[-1]['cumulative_interest_earned'] > 0
 
     def test_cumulative_interest_paid_positive(self):
-        from src.data.generate_pe_fund import generate_fund_cash_management
+        from fund_risk_workflow.data.generate_pe_fund import generate_fund_cash_management
         val_reports = generate_valuation_reports()
         result = generate_fund_cash_management(val_reports)
         assert result[-1]['cumulative_interest_paid'] > 0
 
     def test_all_required_fields_present(self):
-        from src.data.generate_pe_fund import generate_fund_cash_management
+        from fund_risk_workflow.data.generate_pe_fund import generate_fund_cash_management
         val_reports = generate_valuation_reports()
         result = generate_fund_cash_management(val_reports)
         required = {
@@ -345,7 +345,7 @@ class TestSubLine:
 
     def test_capital_calls_delayed_90_days(self):
         """Capital calls must be 90 days after investment date when sub line active."""
-        from src.data.generate_pe_fund import SUB_LINE_DAYS
+        from fund_risk_workflow.data.generate_pe_fund import SUB_LINE_DAYS
         flows_sub    = generate_cash_flows(use_sub_line=True)
         flows_no_sub = generate_cash_flows(use_sub_line=False)
 

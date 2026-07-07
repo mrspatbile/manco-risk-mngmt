@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "sp500_reference",
+  "name": "S&P 500 Reference",
+  "description": "Single-index equity reference benchmark for relative VaR and performance attribution.",
+  "components": [
+    {
+      "identifier": "SP500",
+      "asset_class": "equity",
+      "weight": 1.0,
+      "proxy_ticker": "SPY US Equity",
+      "currency": "USD"
+    }
+  ],
+  "rebalance_frequency": "not_applicable",
+  "use_cases": ["relative_var", "performance_attribution"],
+  "_note": "Historical benchmark returns are reconstructed from the configured proxy time series."
+}

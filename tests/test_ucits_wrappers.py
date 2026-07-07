@@ -21,7 +21,7 @@ import pandas as pd
 
 def test_reference_data_loaders():
     """Test reference data loaders."""
-    from src.data.reference_data import (
+    from fund_risk_workflow.data.reference_data import (
         load_rmp,
         load_fund_profile,
         load_regulatory_framework,
@@ -40,7 +40,7 @@ def test_reference_data_loaders():
     # Load risk policy (operational parameters and monitoring choices)
     rmp = load_rmp('UCITS_Balanced')
     assert rmp['fund_id'] == 'UCITS_Balanced'
-    assert rmp['global_exposure_policy']['reference_portfolio_id'] == 'ucits_balanced_60_40'
+    assert rmp['global_exposure_policy']['reference_portfolio_id'] == 'global_equity_60_eur_gov_40'
     print(f"  ✓ load_rmp() works, reference_portfolio_id = {rmp['global_exposure_policy']['reference_portfolio_id']}")
 
     # Load regulatory framework
@@ -52,12 +52,12 @@ def test_reference_data_loaders():
 
     # Load reference portfolios
     portfolios = load_reference_portfolios()
-    assert 'ucits_balanced_60_40' in portfolios
+    assert 'global_equity_60_eur_gov_40' in portfolios
     print(f"  ✓ load_reference_portfolios() works, found {len(portfolios)} portfolio(s)")
 
     # Load specific portfolio
-    portfolio = load_reference_portfolio('ucits_balanced_60_40')
-    assert portfolio['name'] == 'UCITS Balanced 60/40 Reference Portfolio'
+    portfolio = load_reference_portfolio('global_equity_60_eur_gov_40')
+    assert portfolio['name'] == '60% Global Equity / 40% EUR Government Bonds'
     assert len(portfolio['components']) == 2
     print(f"  ✓ load_reference_portfolio() works, loaded {portfolio['name']}")
 
@@ -69,7 +69,7 @@ def test_reference_data_loaders():
 
 def test_srri_bucket_mapping():
     """Test SRRI bucket mapping."""
-    from src.risk.ucits_srri import map_volatility_to_srri_bucket, SRRI_BOUNDARIES
+    from fund_risk_workflow.risk.ucits_srri import map_volatility_to_srri_bucket, SRRI_BOUNDARIES
 
     print("\n[TEST] SRRI bucket mapping...")
 
@@ -97,7 +97,7 @@ def test_srri_bucket_mapping():
 
 def test_srri_from_returns():
     """Test SRRI computation from returns."""
-    from src.risk.ucits_srri import compute_srri_from_returns
+    from fund_risk_workflow.risk.ucits_srri import compute_srri_from_returns
 
     print("\n[TEST] SRRI computation from returns...")
 
@@ -120,7 +120,7 @@ def test_srri_from_returns():
 
 def test_srri_change_trigger():
     """Test SRRI change trigger logic."""
-    from src.risk.ucits_srri import check_srri_change_trigger
+    from fund_risk_workflow.risk.ucits_srri import check_srri_change_trigger
 
     print("\n[TEST] SRRI change trigger...")
 
@@ -146,7 +146,7 @@ def test_srri_change_trigger():
 
 def test_relative_var_evaluation():
     """Test relative VaR evaluation."""
-    from src.risk.ucits_relative_var import evaluate_relative_var_limit
+    from fund_risk_workflow.risk.ucits_relative_var import evaluate_relative_var_limit
 
     print("\n[TEST] Relative VaR evaluation...")
 
@@ -177,11 +177,11 @@ def test_relative_var_evaluation():
 
 def test_reference_portfolio_weights():
     """Test reference portfolio weight validation."""
-    from src.data.reference_data import load_reference_portfolio
+    from fund_risk_workflow.data.reference_data import load_reference_portfolio
 
     print("\n[TEST] Reference portfolio weight validation...")
 
-    portfolio = load_reference_portfolio('ucits_balanced_60_40')
+    portfolio = load_reference_portfolio('global_equity_60_eur_gov_40')
     total_weight = sum(c['weight'] for c in portfolio['components'])
 
     print(f"  Portfolio: {portfolio['name']}")
@@ -197,7 +197,7 @@ def test_reference_portfolio_weights():
 def test_srri_kiid_trigger_with_disclosed_baseline():
     """Test SRRI KIID trigger logic with official disclosed baseline."""
     import pandas as pd
-    from src.risk.ucits_srri import check_srri_change_trigger
+    from fund_risk_workflow.risk.ucits_srri import check_srri_change_trigger
 
     print("\n[TEST] SRRI KIID trigger with disclosed baseline...")
 

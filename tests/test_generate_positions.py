@@ -9,7 +9,7 @@ import pytest
 import pandas as pd
 import numpy as np
 import os
-from src.data.generate_positions import (
+from fund_risk_workflow.data.generate_positions import (
     generate_hedge_fund,
     generate_private_debt,
     generate_real_estate,
@@ -17,6 +17,8 @@ from src.data.generate_positions import (
     DATES,
     OUTPUT_DIR,
 )
+from fund_risk_workflow.data.paths import position_file
+from fund_risk_workflow.config import VALUATION_DATE
 
 
 # ----------------------------------------------------------------
@@ -182,8 +184,19 @@ class TestAssetClasses:
     def test_hedge_fund_has_bonds(self, hedge_fund):
         assert 'Bond' in hedge_fund['asset_class'].values
 
-    def test_hedge_fund_has_fx(self, hedge_fund):
-        assert 'FX' in hedge_fund['asset_class'].values
+    def test_hedge_fund_has_fx_exposure(self, hedge_fund):
+        # After derivative reclassification, FX exposure comes via derivative
+        # contracts with underlying_asset_class='FX', not asset_class='FX'.
+        # Check for FX forwards in the fund (should have FWD_EURUSD_001, FWD_GBPUSD_001).
+        from fund_risk_workflow.data.reference_data import load_derivative_contracts
+        fx_derivatives = [
+            'FWD_EURUSD_001',
+            'FWD_GBPUSD_001',
+        ]
+        derivatives = hedge_fund[hedge_fund['asset_class'] == 'Derivative']
+        fx_deriv_isins = derivatives['isin'].values
+        assert any(isin in fx_deriv_isins for isin in fx_derivatives), \
+            f'No FX derivatives found. Expected some of {fx_derivatives} in {fx_deriv_isins}'
 
     def test_private_debt_has_loans(self, private_debt):
         assert 'Loan' in private_debt['asset_class'].values
@@ -302,19 +315,19 @@ class TestExcelOutput:
         )
         for fund in ['AIFM_HedgeFund', 'AIFM_PrivateDebt',
                      'AIFM_RealEstate', 'UCITS_Balanced']:
-            path = f'{OUTPUT_DIR}/fund_positions_{fund}.xlsx'
+            path = str(position_file(OUTPUT_DIR, fund, VALUATION_DATE))
             assert os.path.exists(path), f'missing: {path}'
 
     def test_excel_readable_with_pandas(self):
         for fund in ['AIFM_HedgeFund', 'AIFM_PrivateDebt',
                      'AIFM_RealEstate', 'UCITS_Balanced']:
-            path = f'{OUTPUT_DIR}/fund_positions_{fund}.xlsx'
+            path = str(position_file(OUTPUT_DIR, fund, VALUATION_DATE))
             if os.path.exists(path):
                 df = pd.read_excel(path)
                 assert len(df) > 0
 
     def test_excel_has_correct_columns(self):
-        path = f'{OUTPUT_DIR}/fund_positions_UCITS_Balanced.xlsx'
+        path = str(position_file(OUTPUT_DIR, 'UCITS_Balanced', VALUATION_DATE))
         if os.path.exists(path):
             df = pd.read_excel(path)
             for col in STANDARD_COLS:
@@ -359,14 +372,30 @@ class TestMarketValueComputation:
         expected = equities['quantity'] * equities['price']
         assert abs(equities['market_value_local'] - expected) < 2.0
 
-    def test_derivative_market_value_uses_lot_size_100(
-            self, hedge_fund):
-        derivs = hedge_fund[
+    def test_derivative_market_value_options_use_lot_size_100(self, hedge_fund):
+        # Listed options use lot size 100 for display valuation
+        options = hedge_fund[
             (hedge_fund['asset_class'] == 'Derivative') &
+            (hedge_fund['sub_asset_class'] == 'Listed Option') &
             (hedge_fund['position_date'] == hedge_fund['position_date'].max())
-        ].iloc[0]
-        expected = derivs['quantity'] * derivs['price'] * 100
-        assert abs(derivs['market_value_local'] - expected) < 1.0
+        ]
+        if len(options) > 0:
+            opt = options.iloc[0]
+            expected = opt['quantity'] * opt['price'] * 100
+            assert abs(opt['market_value_local'] - expected) < 1.0
+
+    def test_derivative_market_value_futures_forwards_use_economic_valuation(self, hedge_fund):
+        # Futures and forwards use quantity * price (economic valuation for display)
+        # Real derivative notional comes from derivative_contracts + exposure helper
+        futures_forwards = hedge_fund[
+            (hedge_fund['asset_class'] == 'Derivative') &
+            (hedge_fund['sub_asset_class'].isin(['Future', 'Forward'])) &
+            (hedge_fund['position_date'] == hedge_fund['position_date'].max())
+        ]
+        if len(futures_forwards) > 0:
+            deriv = futures_forwards.iloc[0]
+            expected = deriv['quantity'] * deriv['price']
+            assert abs(deriv['market_value_local'] - expected) < 1.0
 
     def test_cash_market_value_equals_quantity(
             self, hedge_fund):
@@ -413,10 +442,13 @@ class TestESGFields:
         telecom = df[df['isin'] == 'XS2341234567'].iloc[0]
         assert pd.isna(telecom['esg_score'])
 
-    def test_clo_esg_none(self):
+    def test_clo_esg_simulated_look_through(self):
+        # CLO entries in esg_scores.json now carry explicitly simulated
+        # manager-estimated look-through scores (MRS-198), so the
+        # generator embeds them like other no-ticker reference scores.
         df = generate_private_debt()
         clo = df[df['isin'] == 'XS1122334455'].iloc[0]
-        assert pd.isna(clo['esg_score'])
+        assert clo['esg_score'] == 57
 
     def test_cash_esg_none(self):
         df = generate_private_debt()

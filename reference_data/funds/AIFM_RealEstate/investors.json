@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "fund_id": "AIFM_RealEstate",
+  "description": "Simulated real estate investor register for concentration and closed-ended funding-risk monitoring",
+  "data_classification": "simulated",
+  "target_nav_eur": 200000000,
+  "investors": [
+    {
+      "investor_id": "RE001",
+      "investor_name": "Dutch Pension Fund",
+      "investor_type": "Pension Fund",
+      "nav_pct": 0.20
+    },
+    {
+      "investor_id": "RE002",
+      "investor_name": "French Insurance Co",
+      "investor_type": "Insurance",
+      "nav_pct": 0.16
+    },
+    {
+      "investor_id": "RE003",
+      "investor_name": "Belgian Pension Alliance",
+      "investor_type": "Pension Fund",
+      "nav_pct": 0.12
+    },
+    {
+      "investor_id": "RE004",
+      "investor_name": "German Insurer",
+      "investor_type": "Insurance",
+      "nav_pct": 0.07
+    },
+    {
+      "investor_id": "RE005",
+      "investor_name": "Nordic Pension",
+      "investor_type": "Pension Fund",
+      "nav_pct": 0.07
+    },
+    {
+      "investor_id": "RE006",
+      "investor_name": "Austrian Pension Fund",
+      "investor_type": "Pension Fund",
+      "nav_pct": 0.06
+    },
+    {
+      "investor_id": "RE007",
+      "investor_name": "Swiss RE Co",
+      "investor_type": "Insurance",
+      "nav_pct": 0.06
+    },
+    {
+      "investor_id": "RE008",
+      "investor_name": "Family Office A",
+      "investor_type": "Family Office",
+      "nav_pct": 0.055
+    },
+    {
+      "investor_id": "RE009",
+      "investor_name": "Endowment B",
+      "investor_type": "Endowment",
+      "nav_pct": 0.055
+    },
+    {
+      "investor_id": "RE010",
+      "investor_name": "Asset Manager C",
+      "investor_type": "Asset Manager",
+      "nav_pct": 0.05
+    },
+    {
+      "investor_id": "RE011",
+      "investor_name": "Institutional Investor D",
+      "investor_type": "Asset Manager",
+      "nav_pct": 0.05
+    },
+    {
+      "investor_id": "RE012",
+      "investor_name": "Private Bank E",
+      "investor_type": "Private Bank",
+      "nav_pct": 0.05
+    }
+  ]
+}

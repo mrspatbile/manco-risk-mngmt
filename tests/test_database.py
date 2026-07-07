@@ -11,7 +11,7 @@ import numpy as np
 import os
 from pathlib import Path
 import sqlalchemy as sa
-from src.data.database import (
+from fund_risk_workflow.data.database import (
     create_db,
     load_fund_metadata,
     load_positions,
@@ -22,6 +22,14 @@ from src.data.database import (
     query_asset_class_breakdown,
     query_largest_positions,
 )
+from fund_risk_workflow.data.generate_positions import (
+    generate_hedge_fund,
+    generate_private_debt,
+    generate_real_estate,
+    generate_ucits_balanced,
+)
+from fund_risk_workflow.data.paths import position_file
+from fund_risk_workflow.config import VALUATION_DATE
 
 # ----------------------------------------------------------------
 # Fixtures
@@ -39,10 +47,25 @@ def engine():
     if os.path.exists(TEST_DB):
         os.remove(TEST_DB)
 
+    # Generate position files if they don't exist
+    DATA_DIR = str(ROOT_DIR / 'data')
+    position_files = [
+        position_file(DATA_DIR, fund, VALUATION_DATE)
+        for fund in ['AIFM_HedgeFund', 'AIFM_PrivateDebt', 'AIFM_RealEstate', 'UCITS_Balanced']
+    ]
+    if not all(Path(pf).exists() for pf in position_files):
+        # Ensure directory exists
+        Path(position_files[0]).parent.mkdir(parents=True, exist_ok=True)
+        # Generate all position files
+        generate_hedge_fund().to_excel(position_files[0], index=False)
+        generate_private_debt().to_excel(position_files[1], index=False)
+        generate_real_estate().to_excel(position_files[2], index=False)
+        generate_ucits_balanced().to_excel(position_files[3], index=False)
+
     engine = create_db(TEST_DB)
     load_fund_metadata(engine)
     load_positions(engine)
-    # create_indexes(engine)   
+    # create_indexes(engine)
     load_instruments(engine)
     yield engine
     # cleanup
@@ -292,10 +315,15 @@ class TestQueryAssetClassBreakdown:
             engine, 'UCITS_Balanced', '2026-03-31')
         assert abs(result['weight_pct'].sum() - 100.0) < 1.0
 
-    def test_hedge_fund_has_negative_weights(self, engine):
+    def test_hedge_fund_breakdown_includes_derivatives(self, engine):
         result = query_asset_class_breakdown(
             engine, 'AIFM_HedgeFund', '2026-03-31')
-        assert (result['weight_pct'] < 0).any()
+        # After Phase B, derivatives are classified as asset_class='Derivative'
+        # and should appear in the breakdown with non-zero weight
+        assert 'Derivative' in result['asset_class'].values
+        deriv_row = result[result['asset_class'] == 'Derivative']
+        assert len(deriv_row) == 1
+        assert abs(deriv_row.iloc[0]['weight_pct']) > 0
 
 
 class TestQueryLargestPositions:

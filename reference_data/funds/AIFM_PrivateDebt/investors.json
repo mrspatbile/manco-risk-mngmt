@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "fund_id": "AIFM_PrivateDebt",
+  "description": "Simulated private debt investor register for concentration and closed-ended funding-risk monitoring",
+  "data_classification": "simulated",
+  "target_nav_eur": 150000000,
+  "investors": [
+    {
+      "investor_id": "PD001",
+      "investor_name": "Nordic Sovereign Wealth Fund",
+      "investor_type": "Sovereign Wealth Fund",
+      "nav_pct": 0.35
+    },
+    {
+      "investor_id": "PD002",
+      "investor_name": "European Insurance Alliance",
+      "investor_type": "Insurance",
+      "nav_pct": 0.20
+    },
+    {
+      "investor_id": "PD003",
+      "investor_name": "German Pension Consortium",
+      "investor_type": "Pension Fund",
+      "nav_pct": 0.15
+    },
+    {
+      "investor_id": "PD004",
+      "investor_name": "Danish Pension Fund A",
+      "investor_type": "Pension Fund",
+      "nav_pct": 0.06
+    },
+    {
+      "investor_id": "PD005",
+      "investor_name": "Institutional Investor B",
+      "investor_type": "Asset Manager",
+      "nav_pct": 0.06
+    },
+    {
+      "investor_id": "PD006",
+      "investor_name": "Insurance Holding C",
+      "investor_type": "Insurance",
+      "nav_pct": 0.06
+    },
+    {
+      "investor_id": "PD007",
+      "investor_name": "Family Office D",
+      "investor_type": "Family Office",
+      "nav_pct": 0.06
+    },
+    {
+      "investor_id": "PD008",
+      "investor_name": "Asset Manager E",
+      "investor_type": "Asset Manager",
+      "nav_pct": 0.06
+    }
+  ]
+}

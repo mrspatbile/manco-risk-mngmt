@@ -18,7 +18,7 @@
       "absolute_var": "absolute_var_pct_tna",
       "relative_var": "relative_var_pct"
     },
-    "reference_portfolio_id": "ucits_balanced_60_40",
+    "reference_portfolio_id": "global_equity_60_eur_gov_40",
     "uses_commitment_disclosure": false,
     "uses_derivative_notional_leverage_reporting": true
   },

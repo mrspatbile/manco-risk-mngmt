@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "global_equity_60_eur_gov_40",
+  "name": "60% Global Equity / 40% EUR Government Bonds",
+  "description": "Reusable 60/40 reference portfolio for relative VaR and performance attribution.",
+  "components": [
+    {
+      "identifier": "GLOBAL_EQUITY_PROXY",
+      "asset_class": "equity",
+      "weight": 0.6,
+      "proxy_ticker": "SPY US Equity",
+      "currency": "USD"
+    },
+    {
+      "identifier": "EUR_GOVERNMENT_BONDS",
+      "asset_class": "fixed_income",
+      "weight": 0.4,
+      "proxy_ticker": "IEAG LN Equity",
+      "currency": "EUR"
+    }
+  ],
+  "rebalance_frequency": "annual",
+  "use_cases": ["relative_var", "performance_attribution"],
+  "_note": "Historical benchmark returns are reconstructed from the weighted component return series over the lookback window."
+}

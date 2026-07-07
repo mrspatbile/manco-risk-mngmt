@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "fund_id": "AIFM_PE_Buyout",
+  "redemption_terms": "Closed-ended fund",
+  "notice_period_days": null,
+  "lockup_days": null,
+  "liquidity_profile": "closed_ended",
+  "valuation_frequency": "quarterly",
+  "var_framework": null,
+  "fund_structure": {
+    "fund_life_years": 10,
+    "investment_period_end": "2023-12-31",
+    "committed_capital_eur": 350000000
+  },
+  "performance_metrics": {
+    "track_xirr": true,
+    "track_moic_dpi_rvpi": true,
+    "benchmark_pme": true
+  },
+  "esg_framework": {
+    "esg_data_source": "independent_appraiser",
+    "sfdr_pai_tracking": null
+  },
+  "unfunded_commitments": {
+    "tracking": true,
+    "limit_pct": null
+  },
+  "leverage": {
+    "fund_level_limit": null,
+    "project_level_via_covenants": true
+  },
+  "stress_scenarios": {
+    "nav_markdown_pct": -0.20,
+    "multiple_compression_x": -2.0,
+    "revenue_stress_pct": -0.15,
+    "sector_concentration_sector": "Technology",
+    "sector_concentration_shock_pct": -0.30,
+    "historical_gfc_proxy_pct": -0.35,
+    "_note": "S1-S5 NAV sensitivity scenarios migrated verbatim from existing notebook assumptions (ESMA/2020/1498-style PE stress set)."
+  },
+  "liquidity_stress": {
+    "capital_call_stress_pct_of_unfunded": 0.30,
+    "_note": "30% accelerated drawdown of unfunded commitments migrated verbatim from an existing notebook assumption."
+  },
+  "_note": "PE buyout fund uses alternative asset model (pe_companies.json). Risk management is based on company-level metrics (XIRR, MOIC, DPI, RVPI, covenant compliance) and capital deployment."
+}

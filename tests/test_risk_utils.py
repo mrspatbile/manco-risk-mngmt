@@ -8,7 +8,7 @@ Run with: python3 -m pytest tests/test_risk_utils.py -v
 import pytest
 import numpy as np
 import pandas as pd
-from src.risk.risk_utils import (
+from fund_risk_workflow.risk.risk_utils import (
     var_historical, var_parametric, var_scale,
     es_historical, es_parametric, es_scale,
     kupiec_test, christoffersen_test,
@@ -21,11 +21,11 @@ from src.risk.risk_utils import (
     liquidity_adjusted_var, compute_pnl_attribution,
     pre_trade_check, lmt_trigger_analysis,
 )
-from src.risk.risk_utils import (  # private helpers — tested directly
+from fund_risk_workflow.risk.risk_utils import (  # private helpers — tested directly
     _ptc_apply_trade, _ptc_portfolio_var,
     _check_ucits, _check_aifm_hf, _check_aifm_pd,
 )
-from src.data.database import get_engine
+from fund_risk_workflow.data.database import get_engine
 
 
 # ----------------------------------------------------------------

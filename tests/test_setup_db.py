@@ -19,8 +19,8 @@ ROOT_DIR = Path(__file__).parent.parent
 import sys
 sys.path.insert(0, str(ROOT_DIR))
 
-from src.setup_db import run, table_exists, positions_loaded, enriched_exists
-from src.data.database import get_engine
+from fund_risk_workflow.data.setup_db import run, table_exists, positions_loaded, enriched_exists
+from fund_risk_workflow.data.database import get_engine
 
 
 @pytest.mark.skip(reason="integration test - run manually with: pytest tests/test_setup_db.py -v")

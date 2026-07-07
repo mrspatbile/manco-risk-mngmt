@@ -31,5 +31,11 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["src*"]
+where = ["src"]
+include = ["fund_risk_workflow*"]
+
+[tool.ruff]
+exclude = ["notebooks/"]
+
+[tool.ruff.lint]
+extend-ignore = []

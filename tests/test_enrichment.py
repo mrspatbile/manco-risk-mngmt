@@ -14,15 +14,15 @@ from pathlib import Path
 import sqlalchemy as sa
 from sqlalchemy import text
 
-from src.data.database import create_db, load_fund_metadata, load_positions
-from src.data.enrichment import (
+from fund_risk_workflow.data.database import create_db, load_fund_metadata, load_positions
+from fund_risk_workflow.data.enrichment import (
     enrich_positions,
     enrich_all_funds,
     query_enriched,
     get_risk_ready_df,
     _save_enriched,
 )
-from src.data.mock_bloomberg import MockBloomberg
+from fund_risk_workflow.data.mock_bloomberg import MockBloomberg
 
 
 # ----------------------------------------------------------------

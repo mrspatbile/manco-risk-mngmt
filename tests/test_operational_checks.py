@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
-from src.data.operational_checks import (
+from fund_risk_workflow.data.operational_checks import (
     business_day_offset,
     summarise_position_snapshot,
     summarise_risk_ready_dataset,
@@ -192,7 +192,7 @@ class TestValidatePrices:
         self, sample_positions_for_validation
     ):
         """Test that validate_prices returns required columns."""
-        from src.data.mock_bloomberg import MockBloomberg
+        from fund_risk_workflow.data.mock_bloomberg import MockBloomberg
 
         bbg = MockBloomberg()
         price_validation, _ = validate_prices(
@@ -216,7 +216,7 @@ class TestValidatePrices:
         self, sample_positions_for_validation
     ):
         """Test that validate_prices uses date-aligned pricing."""
-        from src.data.mock_bloomberg import MockBloomberg
+        from fund_risk_workflow.data.mock_bloomberg import MockBloomberg
 
         bbg = MockBloomberg()
         valuation_date = "2026-03-31"
@@ -236,7 +236,7 @@ class TestValidatePrices:
         self, sample_positions_for_validation
     ):
         """Test that results are sorted by status."""
-        from src.data.mock_bloomberg import MockBloomberg
+        from fund_risk_workflow.data.mock_bloomberg import MockBloomberg
 
         bbg = MockBloomberg()
         price_validation, _ = validate_prices(

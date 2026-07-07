@@ -11,34 +11,5 @@ reports/
 notebooks/reports
 *.egg-info/
 
-# major refactoring
-notebooks/funds/aifm_infra_fund.ipynb   
-notebooks/funds/aifm_pe_buyout.ipynb    
-notebooks/funds/aifm_private_debt.ipynb 
-notebooks/funds/aifm_real_estate.ipynb  
-notebooks/portfolio_management/
-notebooks/reports/ucits_priips_kid.ipynb
 
-fig/AIFM_HedgeFund_liquidity
-fig/AIFM_Infra_Core
-fig/AIFM_PE_Buyout
-fig/AIFM_PrivateDebt
-fig/AIFM_RealEstate
-
-docs/notebooks_notes/infra.md
-docs/notebooks_notes/pe_buyout.md
-docs/notebooks_notes/private_debt.md
-docs/notebooks_notes/real_estate.md
-docs/notebooks_notes/aifm_comment.md
-
-reference_data/funds/AIFM_Infra_Core
-reference_data/funds/AIFM_PE_Buyout
-reference_data/funds/AIFM_PrivateDebt
-reference_data/funds/AIFM_RealEstate
-
-reference_data/portfolios/infra_assets.json
-reference_data/portfolios/pe_companies.json
-
-src/data/generate_infra_fund.py
-src/data/generate_pe_fund.py
 

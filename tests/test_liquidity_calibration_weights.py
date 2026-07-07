@@ -7,7 +7,7 @@ Also tests merging computed weights into calibration investor assumptions.
 """
 
 import pytest
-from src.data.reference_data import (
+from fund_risk_workflow.data.reference_data import (
     compute_liquidity_calibration_weights,
     merge_computed_weights_into_investors,
     build_lmt_parameters,
@@ -350,7 +350,7 @@ class TestBuildLMTParametersWithComputedWeights:
     def test_build_lmt_parameters_computes_and_merges_weights(self):
         """build_lmt_parameters computes weights from registry and merges them."""
         # This is an integration test using actual fund data
-        from src.data.reference_data import load_investor_and_calibration_data
+        from fund_risk_workflow.data.reference_data import load_investor_and_calibration_data
 
         data = load_investor_and_calibration_data('UCITS_Balanced')
 
@@ -379,7 +379,7 @@ class TestBuildLMTParametersWithComputedWeights:
 
     def test_build_lmt_parameters_schedule_uses_enriched_investors(self):
         """Redemption schedule is built using enriched investors with weights."""
-        from src.data.reference_data import load_investor_and_calibration_data
+        from fund_risk_workflow.data.reference_data import load_investor_and_calibration_data
 
         data = load_investor_and_calibration_data('UCITS_Balanced')
 
@@ -400,7 +400,7 @@ class TestBuildLMTParametersWithComputedWeights:
 
     def test_build_redemption_schedule_with_weights(self):
         """build_redemption_schedule works when investors have weights."""
-        from src.computation.liquidity_calibration import build_redemption_schedule
+        from fund_risk_workflow.computation.liquidity_calibration import build_redemption_schedule
 
         calibration_config = {
             'investors': [
