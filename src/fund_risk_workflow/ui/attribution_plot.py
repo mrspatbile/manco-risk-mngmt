@@ -4,7 +4,7 @@ Visualizes daily factor decomposition (equity, rates, FX, residual).
 """
 
 import matplotlib.pyplot as plt
-from fund_risk_workflow.ui.plot_style import C, ACCENT, ACCENT2, ACCENT3, FONT
+from fund_risk_workflow.ui.plot_style import C, ACCENT, ACCENT2, ACCENT3
 from fund_risk_workflow.ui.nb_utils import save_fig
 
 
@@ -87,7 +87,6 @@ def plot_attribution_cumsum(attr_cumsum, fund_id, valuation_date: str | None = N
     plt.tight_layout(rect=[0, 0, 1, 0.97])
 
     if export_id is not None:
-        from pathlib import Path
         from fund_risk_workflow.ui.nb_utils import _slugify, _get_project_root
         title_slug = _slugify('P&L attribution')
         filename = f'{export_id}_{title_slug}'

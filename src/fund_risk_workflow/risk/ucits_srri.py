@@ -16,7 +16,7 @@ Key principles:
 
 import pandas as pd
 import numpy as np
-from typing import Optional, Tuple
+from typing import Tuple
 
 
 # CESR/10-673 SRI bucket boundaries (annualised volatility %)

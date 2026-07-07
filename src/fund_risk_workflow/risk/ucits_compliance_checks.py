@@ -11,7 +11,7 @@ Checks:
 """
 
 import pandas as pd
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 
 def check_long_only(positions: pd.DataFrame) -> Tuple[bool, Dict]:

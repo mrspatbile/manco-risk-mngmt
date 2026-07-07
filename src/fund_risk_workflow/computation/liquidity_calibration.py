@@ -9,7 +9,6 @@ Handles:
 
 import numpy as np
 import pandas as pd
-from scipy.stats import beta
 
 
 def beta_params_from_mean_concentration(

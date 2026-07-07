@@ -35,8 +35,6 @@ Usage
 
 import numpy as np
 import pandas as pd
-from scipy import stats
-from scipy.stats import norm, t as student_t
 from typing import Optional
 from pathlib import Path
 
@@ -48,7 +46,6 @@ from fund_risk_workflow.computation.var import (
     es_historical,
     es_parametric,
     es_scale,
-    es_from_var,
     kupiec_test,
     christoffersen_test,
 )
@@ -1081,10 +1078,11 @@ __all__ = [
     # liquidity
     'days_to_liquidate',
     'liquidity_buckets',
+    'compute_liquidity_profile',
+    'lmt_trigger_analysis',
     'redemption_stress',
     'compute_leverage',
     'investor_concentration',
-    'load_investor_register',
     'load_counterparty',
     'liquidity_adjusted_var',
     # attribution

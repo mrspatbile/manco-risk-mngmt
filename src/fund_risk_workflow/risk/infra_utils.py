@@ -31,7 +31,6 @@ EU231/2013 Articles 46-49 — risk management
 IPEV Valuation Guidelines — yield capitalisation for infra
 """
 
-import numpy as np
 import pandas as pd
 from typing import Optional
 import sqlalchemy as sa
@@ -40,7 +39,7 @@ from sqlalchemy.orm import Session
 from fund_risk_workflow.data.database import (
     InfraFund, InfraAsset, InfraFundInvestment,
     InfraCashFlow, InfraNavHistory, InfraValuationReport,
-    InfraDebt, InfraCovenant,
+    InfraCovenant,
 )
 from fund_risk_workflow.config import VALUATION_DATE
 from fund_risk_workflow.risk.pe_utils import xirr

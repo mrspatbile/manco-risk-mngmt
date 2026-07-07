@@ -33,7 +33,6 @@ Regulatory basis
 """
 
 
-import os
 from datetime import datetime
 from typing import Any
 
@@ -43,7 +42,6 @@ import sqlalchemy as sa
 from sqlalchemy import text
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
-from openpyxl.utils import get_column_letter
 from sqlalchemy.orm import Session
 
 from fund_risk_workflow.data.database import (
@@ -1057,8 +1055,7 @@ def export_annex_iv_excel(
 
     # Resolve output directory and compute paths
     from pathlib import Path
-    from datetime import datetime
-    from fund_risk_workflow.data.paths import annex_iv_file, annex_iv_dir
+    from fund_risk_workflow.data.paths import annex_iv_file
 
     project_root = Path(__file__).parent.parent.parent.parent
     out_path_obj = Path(output_dir)
@@ -1093,7 +1090,7 @@ def export_annex_iv_excel(
     # Only print progress for all-funds export
     is_all_funds = len(fund_ids) == len(_EXPORT_FUNDS)
     if is_all_funds:
-        print(f'Annex IV export')
+        print('Annex IV export')
         print(f'Reporting period: {quarter_formatted}')
 
     reports: dict[str, dict] = {}

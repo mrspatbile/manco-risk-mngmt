@@ -1,7 +1,7 @@
 from IPython.display import display, HTML
 import re
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import timedelta
 from fund_risk_workflow.ui.plot_style import C
 from fund_risk_workflow.risk.risk_utils import redemption_stress
 from fund_risk_workflow.config import VALUATION_DATE
@@ -149,7 +149,7 @@ def display_dark_table(
         try:
             n_chars = int(spacer_width.replace('px', '').strip())
             df_display[spacer_col] = '_' * n_chars
-        except:
+        except Exception:
             df_display[spacer_col] = ''
     col_styles_remapped = {col_map[k]: v for k, v in col_styles.items() if k in col_map} if col_styles else None
     fmt_remapped        = {col_map.get(k, k): v for k, v in fmt.items()} if fmt else None
@@ -439,7 +439,6 @@ def display_fund_rmp_parameters(fund_id: str, engine, export_id: str | None = No
         'single_investor_threshold_pct': 'Single investor threshold',
         'top_3_investors_threshold_pct': 'Top 3 investors threshold',
         'top_5_investors_threshold_pct': 'Top 5 investors threshold',
-        'scenario_types': 'Scenario types',
         'univariate_scenarios': 'Univariate Scenarios',
         'most_relevant_historical_scenarios': 'Most Relevant Historical Scenarios',
         'pct_tna': '% TNA',
@@ -467,7 +466,6 @@ def display_fund_rmp_parameters(fund_id: str, engine, export_id: str | None = No
         'ltv_covenant_threshold_pct': 'LTV covenant threshold',
         'ltv_threshold_by_asset': 'LTV threshold by asset',
         'management_fee_rate': 'Management fee rate',
-        'method': 'Method',
         'monitoring': 'Monitoring',
         'pct_adv': 'Pct ADV',
         'performance_scenarios': 'Performance scenarios',
@@ -772,7 +770,6 @@ def display_fund_overview_banner(fund_id: str, engine, export_id: str | None = N
     -------
     None
     """
-    from pathlib import Path
     from fund_risk_workflow.ui.nb_utils import _slugify, save_html_as_png
     from fund_risk_workflow.data.reference_data import load_fund_profile
 
@@ -997,9 +994,9 @@ def display_var_es(var_result: dict, valuation_date: str = None, fund_id: str | 
         var_scaled = var_result.get('var_hist_scaled_pct', 0)
         es_1d = var_result.get('es_hist_pct', 0)
         es_scaled = var_result.get('es_hist_scaled_pct', 0)
-        rows.append((f'VaR Historical', f'{var_1d*100:.2f}%',  f'{var_scaled*100:.2f}%',
+        rows.append(('VaR Historical', f'{var_1d*100:.2f}%',  f'{var_scaled*100:.2f}%',
                      f'{var_1d*nav:,.0f}',  f'{var_scaled*nav:,.0f}'))
-        rows.append((f'ES Historical',  f'{es_1d*100:.2f}%',   f'{es_scaled*100:.2f}%',
+        rows.append(('ES Historical',  f'{es_1d*100:.2f}%',   f'{es_scaled*100:.2f}%',
                      f'{es_1d*nav:,.0f}',   f'{es_scaled*nav:,.0f}'))
 
     # Check for parametric metrics
@@ -1008,9 +1005,9 @@ def display_var_es(var_result: dict, valuation_date: str = None, fund_id: str | 
         var_scaled = var_result.get('var_param_scaled_pct', 0)
         es_1d = var_result.get('es_param_pct', 0)
         es_scaled = var_result.get('es_param_scaled_pct', 0)
-        rows.append((f'VaR Parametric', f'{var_1d*100:.2f}%',  f'{var_scaled*100:.2f}%',
+        rows.append(('VaR Parametric', f'{var_1d*100:.2f}%',  f'{var_scaled*100:.2f}%',
                      f'{var_1d*nav:,.0f}',  f'{var_scaled*nav:,.0f}'))
-        rows.append((f'ES Parametric',  f'{es_1d*100:.2f}%',   f'{es_scaled*100:.2f}%',
+        rows.append(('ES Parametric',  f'{es_1d*100:.2f}%',   f'{es_scaled*100:.2f}%',
                      f'{es_1d*nav:,.0f}',   f'{es_scaled*nav:,.0f}'))
 
     df = pd.DataFrame(rows, columns=_c)
@@ -1039,7 +1036,6 @@ def display_backtest_report(report, window_size=250, valuation_date: str | None 
     rep['expected']    = rep['expected'] * 100
 
     # Replace "Fixed-Position" (case-insensitive) with the provided model parameter
-    import re
     rep['model'] = rep['model'].str.replace(r'fixed-position', model, regex=True, case=False)
 
     rep_filter = rep[['model', 'confidence', 'n_obs', 'n_breaches',
@@ -1449,7 +1445,6 @@ def display_redemption_stress(
     """
     from fund_risk_workflow.risk.risk_utils import redemption_stress
     from fund_risk_workflow.data.reference_data import load_investor_base_dict
-    from fund_risk_workflow.computation.liquidity_calibration import compute_redemption_scenarios, compute_weighted_reference_rates
 
     # Convert list to work with
     scenarios_list = list(redemption_scenarios) if redemption_scenarios else []
@@ -1470,7 +1465,7 @@ def display_redemption_stress(
                 largest_pct = largest.get('nav_pct', 0)
                 if largest_pct > 0:
                     scenarios_list.append((largest_pct, 'Largest investor'))
-        except:
+        except Exception:
             pass
 
     # Compute redemption stress for each scenario
@@ -1528,7 +1523,7 @@ def display_redemption_stress(
                     'coverage':       _r['coverage_ratio'],
                     'Action':         _r['recommendation'],
                 })
-    except:
+    except Exception:
         pass
 
     df = pd.DataFrame(rows)
@@ -1970,7 +1965,6 @@ def display_ptc(result: dict, test_number: int | None = None,
     return_html : bool, default False
         If True, return combined HTML string instead of displaying. If False, display in notebook.
     """
-    from datetime import datetime, timedelta
     import pandas as pd
 
     t        = result['proposed_trade']
@@ -2738,11 +2732,10 @@ def display_srri_monitoring(srri_rolling: dict, current_disclosed_srri: int,
     export_id : str, optional
         Export ID prefix for saving plots
     """
-    from fund_risk_workflow.ui.nb_utils import _slugify, save_fig
+    from fund_risk_workflow.ui.nb_utils import _slugify
     import matplotlib.pyplot as plt
     from matplotlib.gridspec import GridSpec
     from fund_risk_workflow.ui.plot_style import ACCENT, C
-    import numpy as np
 
     rolling_df = srri_rolling['rolling_srri_df'].copy()
 

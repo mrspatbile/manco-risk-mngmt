@@ -4,7 +4,7 @@ Visualizes liquidity bucket breakdown and concentration.
 """
 
 import matplotlib.pyplot as plt
-from fund_risk_workflow.ui.plot_style import C, ACCENT, FONT
+from fund_risk_workflow.ui.plot_style import C, ACCENT
 from fund_risk_workflow.ui.nb_utils import save_fig
 
 
@@ -84,7 +84,6 @@ def plot_liquidity_profile(bucket_df, fund_id, metric='pct_nav_abs', valuation_d
     plt.tight_layout(rect=[0, 0, 1, 0.95])
 
     if export_id is not None:
-        from pathlib import Path
         from fund_risk_workflow.ui.nb_utils import _slugify, _get_project_root
         title_slug = _slugify('Liquidity profile')
         filename = f'{export_id}_{title_slug}'

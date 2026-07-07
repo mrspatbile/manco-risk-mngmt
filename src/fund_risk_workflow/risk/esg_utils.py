@@ -21,19 +21,15 @@ ESG_THRESHOLD_LOW : int
 ESG_THRESHOLD_HIGH : int
 """
 
-import json
-from pathlib import Path
 
 import pandas as pd
 import matplotlib.pyplot as plt
 from fund_risk_workflow.ui.nb_utils import save_fig
-from fund_risk_workflow.ui.plot_style import sup_title, C, ACCENT, ACCENT2, ACCENT3, FONT
+from fund_risk_workflow.ui.plot_style import C, ACCENT2, ACCENT3
 from fund_risk_workflow.ui.print_html_utils import display_dark_table
-from fund_risk_workflow.ui.plot_style import C
 from fund_risk_workflow.data.database import (
     query_positions,
-    PEValuationReport, PEPortfolioCompany, PEFundInvestment,
-    InfraValuationReport, InfraAsset, InfraFundInvestment,
+    PEValuationReport, PEPortfolioCompany, InfraValuationReport, InfraAsset,
 )
 from fund_risk_workflow.computation.derivatives import compute_derivative_exposures_portfolio
 from fund_risk_workflow.data.reference_data import (
@@ -553,7 +549,6 @@ def plot_esg_profile(esg_df, FUND_ID, plot_title="06. ESG profile - HF", valuati
     plt.tight_layout(rect=[0, 0, 1, 0.97])
 
     if export_id is not None:
-        from pathlib import Path
         from fund_risk_workflow.ui.nb_utils import _slugify, _get_project_root
         title_slug = _slugify(plot_title.split('.', 1)[-1].strip() if '.' in plot_title else plot_title)
         filename = f'{export_id}_{title_slug}'

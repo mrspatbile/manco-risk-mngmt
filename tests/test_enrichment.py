@@ -7,7 +7,6 @@ Run with: python3 -m pytest tests/test_enrichment.py -v
 
 import pytest
 import pandas as pd
-import numpy as np
 import os
 from pathlib import Path
 
@@ -17,10 +16,8 @@ from sqlalchemy import text
 from fund_risk_workflow.data.database import create_db, load_fund_metadata, load_positions
 from fund_risk_workflow.data.enrichment import (
     enrich_positions,
-    enrich_all_funds,
     query_enriched,
     get_risk_ready_df,
-    _save_enriched,
 )
 from fund_risk_workflow.data.mock_bloomberg import MockBloomberg
 

@@ -329,6 +329,7 @@ def plot_j_curve(j_curve: pd.DataFrame, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'PE J curve')
     plt.show()
+    return fig
 
 
 
@@ -377,6 +378,7 @@ def plot_exit_waterfalls(exit_waterfalls: list, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'European waterfall')
     plt.show()
+    return fig
 
 
 
@@ -427,6 +429,7 @@ def plot_cash_management(cash_summary: pd.DataFrame, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'Fund cash management')
     plt.show()
+    return fig
 
 
 
@@ -497,6 +500,7 @@ def plot_value_bridge_by_company(value_bridge: dict, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'Value bridge by company')
     plt.show()
+    return fig
 
 
 
@@ -524,6 +528,7 @@ def plot_value_bridge_fund(value_bridge: dict, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'Fund level value bridge')
     plt.show()
+    return fig
 
 
 
@@ -550,6 +555,7 @@ def plot_pme(pme: dict, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'PME comparison')
     plt.show()
+    return fig
 
 
 
@@ -580,4 +586,5 @@ def plot_stress_summary(stress: dict, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'PE stress summary')
     plt.show()
+    return fig
     

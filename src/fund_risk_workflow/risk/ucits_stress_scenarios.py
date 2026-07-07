@@ -18,8 +18,6 @@ Does not use stress_combined() or stress_historical() directly.
 Decomposes multi-factor scenarios into individual risk-factor shocks.
 """
 
-import json
-from pathlib import Path
 import pandas as pd
 import numpy as np
 from fund_risk_workflow.computation.stress import (

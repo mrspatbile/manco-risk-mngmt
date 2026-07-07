@@ -5,7 +5,6 @@ Unit tests for pe_utils.py
 Run with: python3 -m pytest tests/test_pe_utils.py -v
 """
 import pytest
-import numpy as np
 import pandas as pd
 from fund_risk_workflow.risk.pe_utils import (
     xirr, fund_irr, pe_multiples,

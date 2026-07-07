@@ -314,6 +314,7 @@ def plot_nav_timeseries(nav_ts: pd.DataFrame, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'NAV timeseries')
     plt.show()
+    return fig
 
 
 def plot_nav_by_asset(asset_breakdown: pd.DataFrame, fund_id: str,
@@ -342,6 +343,7 @@ def plot_nav_by_asset(asset_breakdown: pd.DataFrame, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'NAV by asset')
     plt.show()
+    return fig
 
 
 def plot_moic_decomposition(performance: dict, fund_id: str,
@@ -369,6 +371,7 @@ def plot_moic_decomposition(performance: dict, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'MOIC decomposition')
     plt.show()
+    return fig
 
 
 def plot_concentration(concentration: dict, fund_id: str,
@@ -422,6 +425,7 @@ def plot_concentration(concentration: dict, fund_id: str,
         _export_fig(fig, fund_id, export_id,
                     'Concentration country subtype sector')
     plt.show()
+    return fig
 
 
 def plot_inflation_linkage(inflation: dict, fund_id: str,
@@ -473,6 +477,7 @@ def plot_inflation_linkage(inflation: dict, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'Inflation sensitivity')
     plt.show()
+    return fig
 
 
 def plot_duration_profile(duration_df: pd.DataFrame, fund_id: str,
@@ -502,6 +507,7 @@ def plot_duration_profile(duration_df: pd.DataFrame, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'Concession duration profile')
     plt.show()
+    return fig
 
 
 def plot_infra_j_curve(cashflow_profile: pd.DataFrame, fund_id: str,
@@ -549,6 +555,7 @@ def plot_infra_j_curve(cashflow_profile: pd.DataFrame, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'Infrastructure J curve')
     plt.show()
+    return fig
 
 
 def plot_cashflow_coverage(coverage: pd.DataFrame, fund_id: str,
@@ -585,6 +592,7 @@ def plot_cashflow_coverage(coverage: pd.DataFrame, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'Cashflow coverage')
     plt.show()
+    return fig
 
 
 def plot_stress_impact(stress: dict, fund_id: str,
@@ -610,6 +618,7 @@ def plot_stress_impact(stress: dict, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'Stress impact fund NAV')
     plt.show()
+    return fig
 
 
 def plot_asset_stress_detail(stress: dict, scenario_name: str, fund_id: str,
@@ -638,3 +647,4 @@ def plot_asset_stress_detail(stress: dict, scenario_name: str, fund_id: str,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'Asset level stress impact')
     plt.show()
+    return fig

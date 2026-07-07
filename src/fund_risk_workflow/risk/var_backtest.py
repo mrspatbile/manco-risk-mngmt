@@ -10,14 +10,10 @@ For each historical date d, compute VaR as if that date's portfolio existed for 
 
 import numpy as np
 import pandas as pd
-from datetime import timedelta
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
-from fund_risk_workflow.data.database import query_positions
-from fund_risk_workflow.data.mock_bloomberg import MockBloomberg
 from fund_risk_workflow.computation.var import kupiec_test, christoffersen_test
-from fund_risk_workflow.pipeline.fixed_position_var import compute_fixed_position_pnl_series, compute_var_from_pnl
 
 
 def get_yield_tenor_for_bond(maturity_str: str, currency: str) -> str:
@@ -40,7 +36,7 @@ def get_yield_tenor_for_bond(maturity_str: str, currency: str) -> str:
         from fund_risk_workflow.config import REFERENCE_DATE
         maturity = pd.Timestamp(maturity_str)
         years_to_maturity = (maturity - pd.Timestamp(REFERENCE_DATE)).days / 365.25
-    except:
+    except Exception:
         years_to_maturity = 5
 
     if currency == 'EUR':

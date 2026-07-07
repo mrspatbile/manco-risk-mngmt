@@ -8,7 +8,6 @@ Run with: python3 -m pytest tests/test_operational_checks.py -v
 import pytest
 import pandas as pd
 import numpy as np
-from datetime import datetime
 
 from fund_risk_workflow.data.operational_checks import (
     business_day_offset,

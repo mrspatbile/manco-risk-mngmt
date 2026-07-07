@@ -74,7 +74,6 @@ def run(force: bool = False) -> None:
         )
         from fund_risk_workflow.data.paths import position_file
         from fund_risk_workflow.config import VALUATION_DATE
-        import pandas as pd
         fund_generators = {
             'AIFM_HedgeFund'  : generate_hedge_fund,
             'AIFM_PrivateDebt': generate_private_debt,

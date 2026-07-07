@@ -7,7 +7,6 @@ results consumed by ui/private_debt_display.py. Performs no display
 and no file export.
 """
 
-import pandas as pd
 
 import fund_risk_workflow.risk.private_debt_utils as pdu
 from fund_risk_workflow.data.database import query_positions

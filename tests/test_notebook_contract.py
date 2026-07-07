@@ -75,11 +75,15 @@ class TestNotebookContract:
                 assert out.get('output_type') != 'error', (
                     f"stored error output: {out.get('ename')}")
 
-    def test_cells_executed_in_order(self, notebook):
-        counts = [c.get('execution_count')
-                  for c in _code_cells(notebook)]
-        assert all(c is not None for c in counts), 'unexecuted code cell'
-        assert counts == sorted(counts), 'out-of-order execution counts'
+    def test_execution_counts_ordered_when_present(self, notebook):
+        # The repo strips notebook outputs via the nbstripout git filter
+        # (.gitattributes), so committed notebooks carry no execution
+        # counts. Only assert monotonic order when counts are present
+        # (i.e. an executed working-tree copy); end-to-end execution is
+        # verified separately by actually running the notebooks.
+        counts = [c.get('execution_count') for c in _code_cells(notebook)]
+        present = [c for c in counts if c is not None]
+        assert present == sorted(present), 'out-of-order execution counts'
 
     def test_no_empty_code_cells(self, notebook):
         for cell in _code_cells(notebook):

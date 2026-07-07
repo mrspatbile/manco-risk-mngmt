@@ -1,6 +1,5 @@
 """Tests for infrastructure workflow additions in infra_utils, builder, displays."""
 
-import pandas as pd
 import pytest
 
 import fund_risk_workflow.risk.infra_utils as inu

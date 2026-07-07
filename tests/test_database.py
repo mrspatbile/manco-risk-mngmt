@@ -7,7 +7,6 @@ Run with: python3 -m pytest tests/test_database.py -v
 
 import pytest
 import pandas as pd
-import numpy as np
 import os
 from pathlib import Path
 import sqlalchemy as sa

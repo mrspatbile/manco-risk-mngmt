@@ -7,7 +7,6 @@ Run with: python3 -m pytest tests/test_derivative_exposure_helper.py -v
 
 import pytest
 import pandas as pd
-import numpy as np
 from fund_risk_workflow.computation.derivatives import (
     fetch_derivative_market_inputs,
     compute_derivative_exposure,

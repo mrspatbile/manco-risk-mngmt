@@ -19,8 +19,6 @@ Functions
 """
 
 import pandas as pd
-import numpy as np
-from typing import Optional
 
 
 def fetch_derivative_market_inputs(

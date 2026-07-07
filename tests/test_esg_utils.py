@@ -6,10 +6,9 @@ Run with: python3 -m pytest tests/test_esg_utils.py -v
 """
 import pytest
 import pandas as pd
-import numpy as np
 from fund_risk_workflow.risk.esg_utils import (
     build_esg_df, esg_portfolio_summary, build_private_esg_df,
-    ESG_FIELDS, ESG_THRESHOLD_LOW, ESG_THRESHOLD_HIGH
+    ESG_THRESHOLD_LOW, ESG_THRESHOLD_HIGH
 )
 from fund_risk_workflow.data.mock_bloomberg import MockBloomberg
 from fund_risk_workflow.data.database import get_engine

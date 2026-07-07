@@ -136,6 +136,7 @@ def plot_direct_property_metrics(property_profile: dict,
     if export_id is not None:
         _export_fig(fig, fund_id, export_id, 'Direct property key metrics')
     plt.show()
+    return fig
 
 
 

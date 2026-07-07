@@ -274,7 +274,6 @@ class TestCacheFreshness:
         If cached data ends before requested end date, cache should be redownloaded.
         """
         import tempfile
-        import os
         from pathlib import Path
 
         # Create a temporary cache directory with a stale cache file

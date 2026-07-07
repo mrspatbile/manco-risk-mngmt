@@ -26,11 +26,10 @@ Usage
     from enrichment import enrich_positions, query_enriched
 """
 import pandas as pd
-import numpy as np
 import sqlalchemy as sa
 from sqlalchemy import text
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
-from sqlalchemy import String, Float, Integer, Boolean
+from sqlalchemy import String, Float, Integer
 from fund_risk_workflow.data.mock_bloomberg import MockBloomberg
 from fund_risk_workflow.data.database import get_engine
 

@@ -4,7 +4,7 @@ Reusable plotting utilities for fund analytics visualizations.
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from fund_risk_workflow.ui.plot_style import C, FONT
+from fund_risk_workflow.ui.plot_style import C
 from fund_risk_workflow.ui.nb_utils import save_fig
 
 # Default colors and settings

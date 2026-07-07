@@ -38,4 +38,23 @@ include = ["fund_risk_workflow*"]
 exclude = ["notebooks/"]
 
 [tool.ruff.lint]
-extend-ignore = []
+extend-ignore = [
+    # == None is required inside SQLAlchemy filter expressions: it generates
+    # SQL `IS NULL`, whereas `is None` evaluates in Python and breaks the query.
+    "E711",
+    # == True/False is used as a NaN-safe pandas mask on columns that may hold
+    # NaN (e.g. is_direct_property); direct truthiness would misbehave.
+    "E712",
+    # Modules configure warnings / the matplotlib backend before imports
+    # (established module style, e.g. board_report.py).
+    "E402",
+    # Legacy one-line statements, ambiguous names, and unused locals in
+    # notebook-extracted code; mass-editing risks behavior changes in
+    # reference-notebook code paths.
+    "E701", "E702", "E741", "F841",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.20",
+]

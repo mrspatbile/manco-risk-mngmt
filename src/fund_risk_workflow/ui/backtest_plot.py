@@ -5,7 +5,7 @@ VaR backtest plotting utility.
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from fund_risk_workflow.ui.plot_style import C, ACCENT, ACCENT2, section_title, FONT
+from fund_risk_workflow.ui.plot_style import C, ACCENT, ACCENT2
 from fund_risk_workflow.ui.nb_utils import save_fig
 
 
@@ -161,7 +161,6 @@ def plot_var_backtest(dates, returns, var_hist, fund_id, title=None, zone=None,
     plt.tight_layout(rect=[0, 0, 1, 0.95])
 
     if export_id is not None:
-        from pathlib import Path
         from fund_risk_workflow.ui.nb_utils import _slugify, _get_project_root
         title_slug = _slugify('VaR backtest')
         filename = f'{export_id}_{title_slug}'

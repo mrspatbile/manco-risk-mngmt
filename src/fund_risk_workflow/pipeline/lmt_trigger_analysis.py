@@ -7,7 +7,6 @@ Orchestrates the complete LMT trigger analysis for a single fund:
 - Returns analysis results for display
 """
 
-import pandas as pd
 
 
 def build_lmt_analysis_inputs(

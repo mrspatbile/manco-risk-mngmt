@@ -6,9 +6,8 @@ Renders investor base summaries, redemption scenarios, and LMT trigger analysis.
 from IPython.display import display, HTML
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
 
-from fund_risk_workflow.ui.plot_style import C, ACCENT, ACCENT2, ACCENT3, apply_ax_style, section_title
+from fund_risk_workflow.ui.plot_style import C, section_title
 from fund_risk_workflow.ui.print_html_utils import display_dark_table
 
 
@@ -119,7 +118,6 @@ def display_top_investors(
     export_id : str, optional
         If provided, save rendered output as PNG.
     """
-    from fund_risk_workflow.computation.liquidity_calibration import summarize_investor_base_by_type
     import pandas as pd
 
     nav = investor_base.get('target_nav_eur', 1.0)
@@ -225,7 +223,7 @@ def display_investor_base(
 
     if export_id is not None:
         from fund_risk_workflow.ui.nb_utils import _slugify, save_html_as_png
-        title_slug = _slugify(f'Investor Type Breakdown')
+        title_slug = _slugify('Investor Type Breakdown')
         filename = f'{export_id}_{title_slug}'
         save_html_as_png(html, fund_id, filename, folder_suffix=folder_suffix)
 
@@ -256,7 +254,6 @@ def display_redemption_scenarios(
     export_id : str, optional
         If provided, save rendered output as PNG.
     """
-    from fund_risk_workflow.computation.liquidity_calibration import format_scenario_for_display
 
     scenarios = scenarios_data.get('redemption_scenarios', [])
     largest_investor = scenarios_data.get('largest_investor_name', '—')
@@ -665,7 +662,6 @@ def plot_redemption(
     plt.tight_layout(rect=[0, 0, 1, 0.95])
 
     if export_id is not None:
-        from pathlib import Path
         from fund_risk_workflow.ui.nb_utils import _slugify, _get_project_root
         title_slug = _slugify('LMT Paid Deferred Backlog')
         filename = f'{export_id}_{title_slug}'
@@ -755,7 +751,6 @@ def plot_lmt_nav_evolution(
     plt.tight_layout(rect=[0, 0, 1, 0.95])
 
     if export_id is not None:
-        from pathlib import Path
         from fund_risk_workflow.ui.nb_utils import _slugify, _get_project_root
         title_slug = _slugify('LMT NAV Evolution')
         filename = f'{export_id}_{title_slug}'
@@ -876,7 +871,6 @@ def plot_lmt_flags(
     plt.tight_layout(rect=[0, 0, 1, 0.95])
 
     if export_id is not None:
-        from pathlib import Path
         from fund_risk_workflow.ui.nb_utils import _slugify, _get_project_root
         title_slug = _slugify('LMT Trigger Status')
         filename = f'{export_id}_{title_slug}'
@@ -1243,7 +1237,7 @@ def plot_lmt_analysis(
         filepath = export_dir / filename
         print(f"Saving plot to: {filepath}")
         fig.savefig(filepath, dpi=150, bbox_inches='tight')
-        print(f"✓ Plot saved successfully")
+        print("✓ Plot saved successfully")
 
     plt.show()
 

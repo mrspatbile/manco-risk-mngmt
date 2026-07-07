@@ -17,9 +17,8 @@ It is not based on realised historical fund returns.
 import pandas as pd
 import numpy as np
 from typing import Tuple
-from sqlalchemy.engine import Engine
 
-from fund_risk_workflow.computation.var import var_historical, var_parametric, var_scale, es_historical, es_scale
+from fund_risk_workflow.computation.var import var_historical, var_scale, es_historical, es_scale
 from fund_risk_workflow.data.mock_bloomberg import MockBloomberg
 
 

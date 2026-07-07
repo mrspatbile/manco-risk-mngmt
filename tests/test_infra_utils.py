@@ -12,9 +12,7 @@ Required coverage (MRS-76):
     - stress_nav returns lower value under positive discount rate shock
 """
 
-import pytest
 import pandas as pd
-import numpy as np
 from fund_risk_workflow.data.database import get_engine
 from fund_risk_workflow.risk.infra_utils import (
     fund_nav_timeseries,

@@ -1,5 +1,5 @@
 import pandas as pd
-from IPython.display import display, HTML
+from IPython.display import display
 from fund_risk_workflow.risk.risk_utils import stress_historical, redemption_stress
 
 def print_asset_class_weights_n_positions(breakdown, NAV):
@@ -32,7 +32,7 @@ def print_var_es(var_1d, var_20d, es_1d, es_20d, NAV):
 
 
 def print_esma_report(n, breach_rate, zone):
-    print(f"ESMA regulatory window — last 250 trading days")
+    print("ESMA regulatory window — last 250 trading days")
     print(f"Breaches    : {n}")
     print(f"Breach rate : {breach_rate*100:.2f}% (expected 1.0%)")
     print(f"ESMA zone   : {zone}")
@@ -253,7 +253,7 @@ def print_redemption_stress(fund_id, notice, redstress, NAV):
 
 def print_counterparty_stress(NAV,_cp_hf,_worst_cp,_cp_loss_eur, _cp_loss_pct):
     print(f"Counterparty Stress — AIFM Hedge Fund  |  NAV: EUR {NAV:,.0f}")
-    print(f"Simulated prime brokerage and OTC derivatives counterparty register\n")
+    print("Simulated prime brokerage and OTC derivatives counterparty register\n")
     print(f"{'Counterparty':<18} {'Type':<16} {'Exposure':>12} {'Collateral':>12} {'Net Exp.':>12} {'% NAV':>8}")
     print('─' * 82)
     for _, r in _cp_hf.iterrows():
@@ -262,19 +262,19 @@ def print_counterparty_stress(NAV,_cp_hf,_worst_cp,_cp_loss_eur, _cp_loss_pct):
     print('─' * 82)
     print(f"\nWorst-case: {_worst_cp['counterparty']} defaults")
     print(f"  Net loss (post-collateral): EUR {_cp_loss_eur:,.0f}  ({_cp_loss_pct*100:.1f}% of NAV)")
-    print(f"  AIFMD limit: no single counterparty net exposure > 5% NAV (UCITS/AIFM guideline)")
+    print("  AIFMD limit: no single counterparty net exposure > 5% NAV (UCITS/AIFM guideline)")
     _flag_cp = "⚠ BREACH" if _cp_loss_pct > 0.05 else "✓ Within limit"
     print(f"  Status: {_flag_cp}")
 
 def print_combined_stress_mkt_plus_liq(NAV, _comb_mkt_eur, _comb_nav_st, 
                                        _comb_redeem_eur, _comb_liquid_st, _comb_gap_st, _comb_action, _comb_cov_st):
-    print(f"Combined Stress — AIFM Hedge Fund  |  Equity −20% + 25% Redemption")
+    print("Combined Stress — AIFM Hedge Fund  |  Equity −20% + 25% Redemption")
     print(f"Baseline NAV: EUR {NAV/1e6:,.1f}M\n")
-    print(f"  Market shock (equity −20%):")
+    print("  Market shock (equity −20%):")
     print(f"    Portfolio P&L  : EUR {_comb_mkt_eur/1e6:,.1f}M  ({_comb_mkt_eur/NAV*100:.1f}% NAV)")
     print(f"    Stressed NAV   : EUR {_comb_nav_st/1e6:,.1f}M")
     print()
-    print(f"  Liquidity impact (25% redemption, liquid assets stressed −20%):")
+    print("  Liquidity impact (25% redemption, liquid assets stressed −20%):")
     print(f"    Redemption     : EUR {_comb_redeem_eur/1e6:,.1f}M  (25% pre-stress NAV)")
     print(f"    Liquid assets  : EUR {_comb_liquid_st/1e6:,.1f}M  (post equity shock)")
     print(f"    Liquidity gap  : EUR {_comb_gap_st/1e6:,.1f}M  |  Coverage: {_comb_cov_st:.2f}x")
@@ -283,7 +283,7 @@ def print_combined_stress_mkt_plus_liq(NAV, _comb_mkt_eur, _comb_nav_st,
     _total_stress = _comb_mkt_eur - max(0.0, -_comb_gap_st)
     _total_pct    = _total_stress / NAV * 100
     print(f"  Total combined impact on NAV: EUR {_total_stress/1e6:,.1f}M  ({_total_pct:.1f}% of NAV)")
-    print(f"  Regulatory note: ESMA/2020/1498 §48 — combined stress is a mandatory Annex VI scenario")
+    print("  Regulatory note: ESMA/2020/1498 §48 — combined stress is a mandatory Annex VI scenario")
 
 def print_attribution(attr, flagged):
     print(f"{'Attribution period':<35} {attr.index.min().date()} to {attr.index.max().date()}")
@@ -300,7 +300,7 @@ def print_attribution(attr, flagged):
 
 def print_esg_summary(summary):
 
-    print(f"ESG PORTFOLIO SUMMARY")
+    print("ESG PORTFOLIO SUMMARY")
     print('-' * 45)
     print(f"{'Weighted avg ESG score':<30} {summary['wav_esg']:.1f}/100")
     print(f"{'Weighted avg ENV score':<30} {summary['wav_env']:.1f}/100")

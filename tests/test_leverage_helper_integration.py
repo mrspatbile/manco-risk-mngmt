@@ -7,7 +7,6 @@ Run with: python3 -m pytest tests/test_leverage_helper_integration.py -v
 """
 
 import pytest
-import pandas as pd
 from fund_risk_workflow.data.database import get_engine
 from fund_risk_workflow.data.enrichment import get_risk_ready_df
 from fund_risk_workflow.computation.leverage import compute_leverage

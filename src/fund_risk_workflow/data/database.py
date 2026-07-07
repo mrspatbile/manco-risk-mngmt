@@ -21,14 +21,12 @@ Usage
 
 import json
 import pandas as pd
-import numpy as np
 import os
 import sqlalchemy as sa
 from sqlalchemy import text
 from sqlalchemy.orm import DeclarativeBase, Session
 from sqlalchemy.orm import mapped_column, Mapped
-from sqlalchemy import String, Float, Integer, Date, Boolean
-from datetime import date as date_type
+from sqlalchemy import String, Float, Integer, Boolean
 from pathlib import Path
 
 

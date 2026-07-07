@@ -20,16 +20,14 @@ Usage
 """
 
 
-import os
 import warnings
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict
 
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-import matplotlib.patches as mpatches
 from matplotlib.patches import FancyBboxPatch, Rectangle
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
@@ -38,17 +36,25 @@ import pandas as pd
 from fund_risk_workflow.data.database import get_engine, query_nav_history
 from fund_risk_workflow.data.enrichment import get_risk_ready_df
 from fund_risk_workflow.risk.risk_utils import (
-    HISTORICAL_SCENARIOS,
-    var_historical, var_scale, es_historical, es_scale,
-    stress_equity, stress_rates, stress_credit,
-    stress_combined, stress_historical, stress_property, stress_rental,
-    compute_liquidity_profile,
+    var_historical, var_scale, es_historical, stress_equity, stress_rates, stress_credit,
+    stress_combined, stress_historical, compute_liquidity_profile,
 )
 
 warnings.filterwarnings('ignore')
 
 from fund_risk_workflow.config import LIQUIDITY_BUCKET_ORDER
 from fund_risk_workflow.ui.plot_style import C,  FUND_COLORS
+
+
+# ── liquidity bucket colours (liquid → illiquid, shared palette) ──────────
+BUCKET_COLORS: Dict[str, str] = {
+    '1 day'      : C['green'],
+    '2-7 days'   : C['cyan'],
+    '8-30 days'  : C['blue'],
+    '31-90 days' : C['amber'],
+    '91-365 days': C['amber2'],
+    '> 1 year'   : C['red'],
+}
 
 
 # ── fund configuration ────────────────────────────────────────────────────
@@ -949,6 +955,9 @@ def generate_board_report(
     out_path = str(board_risk_file(resolved_output_dir, valuation_date))
     # Ensure directory exists
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+
+    # Reporting month for the PDF title metadata, e.g. 'March 2026'
+    month_label = pd.Timestamp(valuation_date).strftime('%B %Y')
 
     print(f'Board Risk Report — {valuation_date}')
     print(f'Loading metrics for {len(_LIQUID_FUNDS)} funds...')

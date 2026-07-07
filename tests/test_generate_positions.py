@@ -7,14 +7,12 @@ Run with: python3 -m pytest tests/test_generate_positions.py -v
 
 import pytest
 import pandas as pd
-import numpy as np
 import os
 from fund_risk_workflow.data.generate_positions import (
     generate_hedge_fund,
     generate_private_debt,
     generate_real_estate,
     generate_ucits_balanced,
-    DATES,
     OUTPUT_DIR,
 )
 from fund_risk_workflow.data.paths import position_file
@@ -188,7 +186,6 @@ class TestAssetClasses:
         # After derivative reclassification, FX exposure comes via derivative
         # contracts with underlying_asset_class='FX', not asset_class='FX'.
         # Check for FX forwards in the fund (should have FWD_EURUSD_001, FWD_GBPUSD_001).
-        from fund_risk_workflow.data.reference_data import load_derivative_contracts
         fx_derivatives = [
             'FWD_EURUSD_001',
             'FWD_GBPUSD_001',

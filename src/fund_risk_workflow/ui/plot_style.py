@@ -15,8 +15,7 @@ Usage
 from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.dates
-import matplotlib.gridspec as gridspec
-from matplotlib.patches import Rectangle, FancyBboxPatch
+from matplotlib.patches import Rectangle
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -379,7 +378,6 @@ def breach_fill(ax: plt.Axes, dates, values, limit) -> None:
     Red shaded fill above a breach threshold.
     Matches board_report._page_var() breach shading.
     """
-    import numpy as np
     breach_mask = values > limit
     if breach_mask.any():
         ax.fill_between(

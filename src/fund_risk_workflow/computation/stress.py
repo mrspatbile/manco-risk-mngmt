@@ -32,7 +32,6 @@ Functions
     stress_ltv()            LTV covenant breach test
 """
 
-import numpy as np
 import pandas as pd
 
 from fund_risk_workflow.data.reference_data import load_historical_scenarios

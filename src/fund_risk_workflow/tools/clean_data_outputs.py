@@ -87,7 +87,7 @@ def dry_run():
             print(f"  → {target.relative_to(PROJECT_ROOT)}")
             any_found = True
         else:
-            print(f"  ⊘ (does not exist, would be skipped)")
+            print("  ⊘ (does not exist, would be skipped)")
 
     if not any_found:
         print("  No folders found to clean.")

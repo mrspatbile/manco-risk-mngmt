@@ -13,11 +13,10 @@ Run with: python3 -m pytest tests/test_concentration_fix_phase_f1.py -v
 """
 
 import pytest
-import pandas as pd
 from fund_risk_workflow.data.database import get_engine
 from fund_risk_workflow.data.enrichment import get_risk_ready_df
 from fund_risk_workflow.risk.risk_utils import (
-    pre_trade_check, _ptc_issuer_exposure, _ptc_apply_trade
+    pre_trade_check, _ptc_issuer_exposure
 )
 from fund_risk_workflow.data.mock_bloomberg import MockBloomberg
 from fund_risk_workflow.risk.leverage_computation import build_bbg_maps

@@ -4,7 +4,6 @@ tests/test_generate_pe_fund.py
 Unit tests for generate_pe_fund.py
 Run with: python3 -m pytest tests/test_generate_pe_fund.py -v
 """
-import pytest
 import pandas as pd
 from fund_risk_workflow.data.generate_pe_fund import (
     generate_cash_flows, generate_nav_history,
