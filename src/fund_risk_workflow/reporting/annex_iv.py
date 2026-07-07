@@ -127,8 +127,8 @@ _LEV_LIMITS = {
 
 _REDEMPTION = {
     'AIFM_HedgeFund'  : {'frequency': 'Daily',      'notice_days': 5,   'gate_pct': 10,  'lockup_months': 12},
-    'AIFM_PrivateDebt': {'frequency': 'Quarterly',   'notice_days': 90,  'gate_pct': 20,  'lockup_months': 24},
-    'AIFM_RealEstate' : {'frequency': 'Quarterly',   'notice_days': 90,  'gate_pct': 25,  'lockup_months': 36},
+    'AIFM_PrivateDebt': {'frequency': 'Closed-ended — no periodic redemption', 'notice_days': None, 'gate_pct': None, 'lockup_months': None},
+    'AIFM_RealEstate' : {'frequency': 'Closed-ended — no periodic redemption', 'notice_days': None, 'gate_pct': None, 'lockup_months': None},
     'AIFM_PE_Buyout'  : {'frequency': 'Closed-ended — no periodic redemption', 'notice_days': None, 'gate_pct': None, 'lockup_months': None},
     'AIFM_Infra_Core' : {'frequency': 'Closed-ended — no periodic redemption', 'notice_days': None, 'gate_pct': None, 'lockup_months': None},
 }

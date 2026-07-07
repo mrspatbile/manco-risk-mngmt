@@ -36,7 +36,10 @@ from fund_risk_workflow.data.database import (
     InfraValuationReport, InfraAsset, InfraFundInvestment,
 )
 from fund_risk_workflow.computation.derivatives import compute_derivative_exposures_portfolio
-from fund_risk_workflow.data.reference_data import load_derivative_contracts
+from fund_risk_workflow.data.reference_data import (
+    load_derivative_contracts,
+    load_esg_scores,
+)
 from sqlalchemy.orm import Session
 
 # from PRM - policy risk management
@@ -54,6 +57,7 @@ def build_esg_df(
     engine,
     fund_id: str,
     position_date: str,
+    use_reference_scores_for_unlisted: bool = False,
     ) -> pd.DataFrame:
     """
     Build position-level ESG DataFrame with look-through for derivatives.
@@ -76,6 +80,11 @@ def build_esg_df(
         Fund identifier.
     position_date : str
         Position snapshot date used to retrieve holdings from the positions table.
+    use_reference_scores_for_unlisted : bool, default False
+        When true, no-ticker instruments are enriched from the existing
+        ``reference_data/instruments/esg_scores.json`` file using ISIN. The
+        default is false to preserve the established hedge-fund and UCITS
+        notebook behavior.
 
     Returns
     -------
@@ -88,6 +97,9 @@ def build_esg_df(
     ticker_map    = dict(zip(raw_positions['isin'],
                              raw_positions['bloomberg_ticker']))
     deriv_contracts = load_derivative_contracts()  # Load once, use in loop
+    reference_scores = (
+        load_esg_scores() if use_reference_scores_for_unlisted else {}
+    )
     esg_rows = []
 
     for _, pos in risk_df.iterrows():
@@ -107,8 +119,10 @@ def build_esg_df(
             for f in ESG_FIELDS:
                 row[f.lower()] = bbg_esg.loc[ticker, f]
         else:
+            reference_score = reference_scores.get(pos['isin'], {})
             for f in ESG_FIELDS:
-                row[f.lower()] = pos.get(f.lower())
+                field = f.lower()
+                row[field] = reference_score.get(field, pos.get(field))
 
         # ESG exposure: delta-adjusted for derivatives with ESG-relevant underlyings, full notional otherwise
         if pos['asset_class'] == 'Derivative':
@@ -551,4 +565,3 @@ def plot_esg_profile(esg_df, FUND_ID, plot_title="06. ESG profile - HF", valuati
         save_fig(fig, FUND_ID, plot_title)
 
     plt.show()
-

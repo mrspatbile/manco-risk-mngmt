@@ -39,6 +39,25 @@ SECTIONS_DICT = {
         'field',
         ['INVESTOR CONCENTRATION (ESMA thresholds)'],
     ),
+    # PE report sections (explicit section list, MRS-198)
+    'sector_exposure': None,
+    'country_exposure': None,
+    'stage_exposure': None,
+    'top5_positions': None,
+    'performance': (
+        'field',
+        ['CAPITAL', 'RETURN METRICS', 'INFRASTRUCTURE CHARACTERISTICS'],
+    ),
+    'aifmd_ii_disclosure': (
+        'field',
+        ['AIFMD II — EXPANDED DISCLOSURES (Directive 2024/927/EU)',
+         'LIQUIDITY MANAGEMENT TOOLS (LMTs)', 'DELEGATION ARRANGEMENTS',
+         'PRINCIPAL MARKETS', 'UNFUNDED COMMITMENTS'],
+    ),
+    # Infrastructure report sections (explicit section list, MRS-198)
+    'asset_breakdown': None,
+    'sector_breakdown': None,
+    'country_breakdown': None,
 }
 
 # Default column widths (CSS) for each section
@@ -71,6 +90,23 @@ COL_WIDTHS_MAP = {
         'field': '300px',
         'value': '250px',
     },
+    # PE / infrastructure sections (explicit section lists, MRS-198)
+    'sector_exposure': {'sector': '260px', 'nav_eur': '160px',
+                        'cost_pct': '90px'},
+    'country_exposure': {'country': '260px', 'nav_eur': '160px',
+                         'cost_pct': '90px'},
+    'stage_exposure': {'stage': '260px', 'nav_eur': '160px',
+                       'cost_pct': '90px'},
+    'top5_positions': {'rank': '50px', 'name': '220px', 'nav_eur': '140px',
+                       'nav_pct': '90px'},
+    'performance': {'field': '300px', 'value': '280px'},
+    'aifmd_ii_disclosure': {'field': '320px', 'value': '380px'},
+    'asset_breakdown': {'asset_name': '240px', 'nav_eur': '140px',
+                        'nav_pct': '90px'},
+    'sector_breakdown': {'sector': '240px', 'nav_eur': '140px',
+                         'nav_pct': '90px'},
+    'country_breakdown': {'country': '240px', 'nav_eur': '140px',
+                          'nav_pct': '90px'},
 }
 
 # Default number formatting (Python format strings) for each section
@@ -84,6 +120,14 @@ FMT_MAP = {
         'nav_eur': '{:,.2f}',
         'nav_pct': '{:.2f}%',
     },
+    # PE / infrastructure sections (nav_eur arrives pre-formatted as text)
+    'sector_exposure': {'cost_pct': '{:.2f}%'},
+    'country_exposure': {'cost_pct': '{:.2f}%'},
+    'stage_exposure': {'cost_pct': '{:.2f}%'},
+    'top5_positions': {'nav_pct': '{:.2f}%'},
+    'asset_breakdown': {'nav_pct': '{:.2f}%', 'moic': '{:.2f}x'},
+    'sector_breakdown': {'nav_pct': '{:.2f}%'},
+    'country_breakdown': {'nav_pct': '{:.2f}%'},
 }
 
 

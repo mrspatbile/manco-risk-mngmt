@@ -319,8 +319,10 @@ def sup_title(fig: plt.Figure, title: str, fontsize=FONT['section']) -> None:
     fig.suptitle(
         title,
         fontsize=fontsize,
-        # fontweight='bold',
-        fontweight=900,
+        # The resolved sans-serif font provides no 900 (black) weight, so
+        # matplotlib silently falls back to 700 and emits a findfont warning.
+        # 'bold' (700) renders identically without the warning.
+        fontweight='bold',
         color=C['cyan'],
         x=0.01,
         ha='left',

@@ -372,6 +372,81 @@ def load_investor_base_dict(fund_id: str) -> dict:
         return data
 
 
+def load_tenant_register(fund_id: str) -> pd.DataFrame:
+    """Load a fund's property lease and tenant register.
+
+    The returned rows remain lease-level so callers can aggregate by tenant,
+    property, or sector without losing the property linkage. Date fields are
+    converted to pandas timestamps. Dataset metadata are exposed through
+    ``DataFrame.attrs``.
+
+    Parameters
+    ----------
+    fund_id : str
+        Fund identifier whose ``tenants.json`` file should be loaded.
+
+    Returns
+    -------
+    pd.DataFrame
+        Lease-level tenant records.
+
+    Raises
+    ------
+    FileNotFoundError
+        If no tenant register exists for the fund.
+    ValueError
+        If the file identifies a different fund or a lease is missing a
+        required field.
+    """
+    module_dir = Path(__file__).parent
+    tenant_path = (
+        module_dir
+        / f'../../../reference_data/funds/{fund_id}/tenants.json'
+    )
+
+    if not tenant_path.exists():
+        raise FileNotFoundError(
+            f"Tenant register not found for {fund_id}: {tenant_path}"
+        )
+
+    with open(tenant_path) as f:
+        data = json.load(f)
+
+    if data.get('fund_id') != fund_id:
+        raise ValueError(
+            f"Tenant register fund_id mismatch: expected {fund_id}, "
+            f"got {data.get('fund_id')}"
+        )
+
+    required = {
+        'lease_id', 'property_isin', 'property_name', 'tenant_id',
+        'tenant_name', 'tenant_sector', 'annual_rent_eur',
+        'lease_start_date', 'lease_end_date', 'indexation_rate_pct',
+        'security_deposit_months',
+    }
+    leases = data.get('leases', [])
+    for index, lease in enumerate(leases):
+        missing = required - set(lease)
+        if missing:
+            raise ValueError(
+                f"Tenant register lease {index} missing fields: {sorted(missing)}"
+            )
+
+    df = pd.DataFrame(leases)
+    for column in ('lease_start_date', 'lease_end_date', 'break_option_date'):
+        if column in df.columns:
+            df[column] = pd.to_datetime(df[column])
+
+    df.attrs.update({
+        'fund_id': fund_id,
+        'as_of_date': data.get('as_of_date'),
+        'currency': data.get('currency'),
+        'data_classification': data.get('data_classification'),
+        'description': data.get('description'),
+    })
+    return df
+
+
 def load_liquidity_calibration_inputs(fund_id: str) -> dict:
     """Load liquidity calibration inputs from JSON file.
 

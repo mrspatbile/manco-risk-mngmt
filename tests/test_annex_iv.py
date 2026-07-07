@@ -129,6 +129,13 @@ class TestBuildAnnexIvPd:
     def test_nav_positive(self, rpt):
         assert rpt['_nav'] > 0
 
+    def test_identification_is_closed_ended(self, rpt):
+        row = rpt['identification'].loc[
+            rpt['identification']['field'] == 'Redemption frequency',
+            'value',
+        ]
+        assert row.iloc[0] == 'Closed-ended — no periodic redemption'
+
     def test_liquidity_buckets_six_rows(self, rpt):
         """MRS-83: liquidity section must be populated."""
         assert len(rpt['liquidity_buckets']) == _BUCKET_COUNT
@@ -169,6 +176,13 @@ class TestBuildAnnexIvRe:
 
     def test_nav_positive(self, rpt):
         assert rpt['_nav'] > 0
+
+    def test_identification_is_closed_ended(self, rpt):
+        row = rpt['identification'].loc[
+            rpt['identification']['field'] == 'Redemption frequency',
+            'value',
+        ]
+        assert row.iloc[0] == 'Closed-ended — no periodic redemption'
 
     def test_liquidity_buckets_six_rows(self, rpt):
         """MRS-83: liquidity section must be populated."""
@@ -307,6 +321,50 @@ class TestBuildAnnexIvInfra:
     def test_no_liquidity_buckets_for_infra(self, rpt):
         # Infra is closed-ended — no ESMA bucket table
         assert 'liquidity_buckets' not in rpt
+
+
+# ================================================================
+# Scoped workflow display
+# ================================================================
+
+def test_workflow_displays_only_explicit_closed_end_sections(monkeypatch):
+    from fund_risk_workflow.reporting import annex_iv_workflow
+
+    report = {
+        'identification': pd.DataFrame({'field': ['Fund'], 'value': ['PD']}),
+        'breakdown': pd.DataFrame({'Category': ['Loan'], 'NAV (EUR)': [1]}),
+        'leverage_detail': pd.DataFrame({'item': ['Gross'], 'value': ['1.0x']}),
+        'liquidity_buckets': pd.DataFrame({'bucket': ['1 day']}),
+    }
+    displayed = []
+    monkeypatch.setattr(
+        annex_iv_workflow.annex_iv,
+        'build_annex_iv',
+        lambda *args, **kwargs: report,
+    )
+    monkeypatch.setattr(
+        annex_iv_workflow.annex_display,
+        'annex_iv_section',
+        lambda _report, section, **kwargs: displayed.append(section),
+    )
+    monkeypatch.setattr(
+        annex_iv_workflow.annex_iv,
+        'export_annex_iv_excel',
+        lambda *args, **kwargs: 'mock.xlsx',
+    )
+
+    sections = ('identification', 'breakdown', 'leverage_detail')
+    result = annex_iv_workflow.run(
+        engine=None,
+        fund_id='AIFM_PrivateDebt',
+        quarter=QUARTER,
+        first_export_id='25',
+        sections=sections,
+    )
+
+    assert displayed == list(sections)
+    assert [name for name, _ in result['sections']] == list(sections)
+    assert 'liquidity_buckets' not in displayed
 
 
 # ================================================================

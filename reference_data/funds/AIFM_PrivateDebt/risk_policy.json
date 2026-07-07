@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "fund_id": "AIFM_PrivateDebt",
+  "redemption_terms": null,
+  "notice_period_days": null,
+  "lockup_days": null,
+  "liquidity_profile": null,
+  "valuation_frequency": "periodic",
+  "var_framework": null,
+  "concentration_limits_internal": {
+    "single_borrower_max_pct": 20.0,
+    "hy_exposure_max_pct": 50.0,
+    "unrated_exposure_max_pct": 10.0
+  },
+  "stress_scenarios": {
+    "use_stress_testing": true,
+    "scenario_types": [
+      "credit",
+      "issuer",
+      "combined"
+    ],
+    "rate_shock_delta_y": 0.02,
+    "credit_spread_delta": 0.015,
+    "recovery_rate_senior_secured": 0.40,
+    "_note": "rate_shock_delta_y (+200bps), credit_spread_delta (+150bps) and recovery_rate_senior_secured (40%, senior secured LGD ~60%) are migrated verbatim from existing notebook assumptions."
+  }
+}

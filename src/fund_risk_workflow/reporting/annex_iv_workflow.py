@@ -34,6 +34,7 @@ def run(
     quarter: str,
     first_export_id: str | int,
     output_dir: str = "data",
+    sections: tuple[str, ...] | list[str] | None = None,
 ) -> dict:
     """
     Orchestrate full Annex IV reporting workflow.
@@ -54,6 +55,11 @@ def run(
         Subsequent sections auto-increment (25, 26, 27, ...).
     output_dir : str, default '../../data'
         Output directory for Excel workbook (relative to project root).
+    sections : tuple[str, ...] or list[str], optional
+        Explicit report sections to display. When omitted, preserves the
+        established liquid-AIF section order. Closed-ended notebook workflows
+        can omit liquidity and redemption sections without changing the
+        default hedge-fund behavior.
 
     Returns
     -------
@@ -64,7 +70,7 @@ def run(
         - 'sections': List of (section_name, export_id) tuples
     """
     # Sections to display in order
-    section_names = [
+    section_names = list(sections) if sections is not None else [
         "identification",
         "breakdown",
         "risk_measures",
@@ -82,6 +88,16 @@ def run(
 
     # 1. Build the Annex IV report
     annex_iv_report = annex_iv.build_annex_iv(engine, fund_id, quarter=quarter)
+
+    missing_sections = [
+        section_name
+        for section_name in section_names
+        if section_name not in annex_iv_report
+    ]
+    if missing_sections:
+        raise ValueError(
+            f"Annex IV sections unavailable for {fund_id}: {missing_sections}"
+        )
 
     # 2. Display each section
     for section_name, export_id in sections:

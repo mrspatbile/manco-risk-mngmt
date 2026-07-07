@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "fund_id": "AIFM_RealEstate",
+  "redemption_terms": null,
+  "notice_period_days": null,
+  "lockup_days": null,
+  "liquidity_profile": "closed_ended",
+  "valuation_frequency": "mixed",
+  "var_framework": null,
+  "direct_property_monitoring": {
+    "track_ltv_pct": true,
+    "track_rental_yield_pct": true,
+    "track_vacancy_rate_pct": true,
+    "ltv_covenant_threshold_pct": null,
+    "vacancy_alarm_threshold_pct": null,
+    "_note": "Direct properties are valued quarterly via appraisal. LTV, rental yield, and vacancy are primary risk indicators."
+  },
+  "ltv_monitoring": {
+    "ltv_warning_threshold": 0.6,
+    "ltv_stress_threshold": 0.75
+  },
+  "stress_scenarios": {
+    "use_stress_testing": true,
+    "scenario_types": [
+      "property_value",
+      "rental_yield",
+      "vacancy"
+    ],
+    "property_value_shock_by_type": {
+      "Office": -0.20,
+      "Logistics": -0.20,
+      "Retail": -0.25,
+      "Residential": -0.15
+    },
+    "rental_stress_delta_vacancy": 0.10,
+    "rental_stress_delta_yield": -0.005,
+    "rate_shock_delta_y": 0.02,
+    "ltv_stress_property_value_shock": -0.25,
+    "tenant_default_capitalisation_yield": 0.05,
+    "_note": "Stress scenarios applied to direct property portfolio only. Listed REITs and FX hedges retain daily market-data treatment.",
+    "_note_migrated": "Property shocks by type, rental stress (+10pp vacancy, -50bps yield), rate shock (+200bps), the -25% LTV stress shock, and the 5% tenant-default capitalisation yield are migrated verbatim from existing notebook assumptions."
+  },
+  "_note_mixed_treatment": "This fund contains direct properties (quarterly appraisal), listed REITs (daily market data), FX hedges (daily), and cash. Current policy treats as single mixed fund."
+}

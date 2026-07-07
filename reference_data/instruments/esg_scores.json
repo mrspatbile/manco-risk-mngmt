@@ -81,13 +81,34 @@
     "carbon_intensity": 38.1
   },
   "XS1122334455": {
-    "controversy_flag": false
+    "esg_score": 57,
+    "env_score": 55,
+    "soc_score": 59,
+    "gov_score": 57,
+    "controversy_flag": false,
+    "carbon_intensity": 140.0,
+    "data_classification": "simulated",
+    "methodology": "manager_estimated_look_through"
   },
   "XS1122334456": {
-    "controversy_flag": false
+    "esg_score": 54,
+    "env_score": 51,
+    "soc_score": 56,
+    "gov_score": 55,
+    "controversy_flag": false,
+    "carbon_intensity": 165.0,
+    "data_classification": "simulated",
+    "methodology": "manager_estimated_look_through"
   },
   "XS1122334457": {
-    "controversy_flag": false
+    "esg_score": 50,
+    "env_score": 47,
+    "soc_score": 52,
+    "gov_score": 51,
+    "controversy_flag": false,
+    "carbon_intensity": 180.0,
+    "data_classification": "simulated",
+    "methodology": "manager_estimated_look_through"
   },
   "PE_001": {
     "esg_score": 62,

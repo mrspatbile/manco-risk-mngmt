@@ -442,10 +442,13 @@ class TestESGFields:
         telecom = df[df['isin'] == 'XS2341234567'].iloc[0]
         assert pd.isna(telecom['esg_score'])
 
-    def test_clo_esg_none(self):
+    def test_clo_esg_simulated_look_through(self):
+        # CLO entries in esg_scores.json now carry explicitly simulated
+        # manager-estimated look-through scores (MRS-198), so the
+        # generator embeds them like other no-ticker reference scores.
         df = generate_private_debt()
         clo = df[df['isin'] == 'XS1122334455'].iloc[0]
-        assert pd.isna(clo['esg_score'])
+        assert clo['esg_score'] == 57
 
     def test_cash_esg_none(self):
         df = generate_private_debt()

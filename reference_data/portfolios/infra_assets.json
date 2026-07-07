@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "assets": [
+    {
+      "asset_id": "INFRA_001",
+      "asset_name": "AquaNet Rhein GmbH",
+      "sector": "Utilities",
+      "sub_type": "regulated",
+      "country": "DE",
+      "regulatory_framework": "Bundesnetzagentur water concession",
+      "concession_start": "2001-01-01",
+      "concession_end": "2046-12-31",
+      "inflation_linkage": 0.8
+    },
+    {
+      "asset_id": "INFRA_002",
+      "asset_name": "R\u00e9seau \u00c9lectrique Nord SAS",
+      "sector": "Utilities",
+      "sub_type": "regulated",
+      "country": "FR",
+      "regulatory_framework": "CRE electricity distribution concession",
+      "concession_start": "2005-01-01",
+      "concession_end": "2040-12-31",
+      "inflation_linkage": 0.75
+    },
+    {
+      "asset_id": "INFRA_003",
+      "asset_name": "Autopista Norte S.A.",
+      "sector": "Transport",
+      "sub_type": "contracted",
+      "country": "ES",
+      "regulatory_framework": "Ministerio de Transportes toll concession",
+      "concession_start": "2008-01-01",
+      "concession_end": "2038-12-31",
+      "inflation_linkage": 0.6
+    },
+    {
+      "asset_id": "INFRA_004",
+      "asset_name": "Aeroporto Adriatico SpA",
+      "sector": "Transport",
+      "sub_type": "contracted",
+      "country": "IT",
+      "regulatory_framework": "ENAC airport concession",
+      "concession_start": "2000-01-01",
+      "concession_end": "2044-12-31",
+      "inflation_linkage": 0.5
+    },
+    {
+      "asset_id": "INFRA_005",
+      "asset_name": "Zephyr Wind BV",
+      "sector": "Energy",
+      "sub_type": "contracted",
+      "country": "NL",
+      "regulatory_framework": "SDE+ offshore wind offtake (20-year)",
+      "concession_start": "2018-01-01",
+      "concession_end": "2038-12-31",
+      "inflation_linkage": 0.9
+    },
+    {
+      "asset_id": "INFRA_006",
+      "asset_name": "Midlands Health PPP Ltd",
+      "sector": "Social",
+      "sub_type": "contracted",
+      "country": "GB",
+      "regulatory_framework": "NHS PFI availability-based contract",
+      "concession_start": "2015-01-01",
+      "concession_end": "2050-12-31",
+      "inflation_linkage": 0.95
+    },
+    {
+      "asset_id": "INFRA_007",
+      "asset_name": "Baltic Port Logistics SA",
+      "sector": "Transport",
+      "sub_type": "merchant",
+      "country": "PL",
+      "regulatory_framework": "Port Authority 45-year concession",
+      "concession_start": "2022-01-01",
+      "concession_end": "2067-12-31",
+      "inflation_linkage": 0.2
+    },
+    {
+      "asset_id": "INFRA_008",
+      "asset_name": "Nordv\u00e4rme AB",
+      "sector": "Utilities",
+      "sub_type": "regulated",
+      "country": "SE",
+      "regulatory_framework": "Energimarknadsinspektionen district heating",
+      "concession_start": "2010-01-01",
+      "concession_end": "2050-12-31",
+      "inflation_linkage": 0.85
+    }
+  ]
+}

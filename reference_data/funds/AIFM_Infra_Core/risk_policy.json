@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "fund_id": "AIFM_Infra_Core",
+  "redemption_terms": "Closed-ended fund",
+  "notice_period_days": null,
+  "lockup_days": null,
+  "liquidity_profile": "closed_ended",
+  "valuation_frequency": "quarterly",
+  "var_framework": null,
+  "fund_structure": {
+    "fund_life_years": 15,
+    "committed_capital_eur": 1200000000,
+    "drawn_capital_eur": 1020000000,
+    "management_fee_rate": 0.01
+  },
+  "covenant_monitoring": {
+    "track_dscr": true,
+    "track_ltv": true,
+    "track_breaches_and_waivers": true,
+    "dscr_threshold_by_asset": null,
+    "ltv_threshold_by_asset": null
+  },
+  "dscr_monitoring": {
+    "dscr_minimum": 1.25,
+    "dscr_warning": 1.5
+  },
+  "valuation_framework": {
+    "method": "yield_capitalisation",
+    "discount_rate_by_asset": "asset_specific",
+    "inflation_assumption_by_asset": "asset_specific"
+  },
+  "inflation_sensitivity": {
+    "track_weighted_concession_duration": true,
+    "track_inflation_linkage_by_asset": true
+  },
+  "sector_concentration": {
+    "monitoring": true,
+    "limit_pct": null
+  },
+  "leverage": {
+    "fund_level_limit": null,
+    "project_level_via_covenants": true
+  },
+  "performance_benchmark": {
+    "cpi_assumption": 0.020,
+    "benchmark_spread_bps": 400,
+    "_note": "CPI + 400bps net IRR target migrated verbatim from an existing notebook assumption."
+  },
+  "valuation_monitoring": {
+    "discount_rate_flag_threshold_bps": 50,
+    "covenant_watch_headroom_pct": 0.10,
+    "_note": "50bps discount-rate movement flag and 10% covenant watch headroom migrated verbatim from existing notebook assumptions."
+  },
+  "stress_scenarios": {
+    "scenarios": [
+      {"name": "(a) +100bps rate shock", "discount_rate_shock_bps": 100, "inflation_shock_pct": 0.00},
+      {"name": "(b) -2% inflation shock", "discount_rate_shock_bps": 0, "inflation_shock_pct": -0.02},
+      {"name": "(c) Combined", "discount_rate_shock_bps": 100, "inflation_shock_pct": -0.02}
+    ],
+    "_note": "Valuation-input stress scenarios migrated verbatim from existing notebook assumptions."
+  },
+  "esg_framework": {
+    "esg_data_source": "independent_appraiser",
+    "sfdr_pai_tracking": null
+  },
+  "_note": "Infrastructure fund uses alternative asset model (infra_assets.json). Risk management is based on asset-level metrics (DSCR, LTV, concession duration, inflation linkage, regulatory framework) and valuation via yield capitalisation with asset-specific assumptions."
+}

@@ -618,3 +618,276 @@ def stress_nav(
         'inflation_shock_pct'    : inflation_shock_pct,
         'asset_detail'           : detail,
     }
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# MRS-198: notebook-extracted aggregations for the infrastructure workflow
+# ══════════════════════════════════════════════════════════════════════════
+
+def infra_portfolio_overview(engine: sa.Engine, fund_id: str,
+                             quarter: str) -> dict:
+    """Fund metadata plus the asset-level portfolio table.
+
+    Returns dict with keys: fund_metadata (DataFrame of field/value rows),
+    assets (DataFrame with sector, sub-type, country, concession end,
+    ownership, drawn equity, appraised equity, and NAV weight),
+    total_nav_eur, total_drawn_eur.
+    """
+    with Session(engine) as session:
+        fund = session.query(InfraFund).filter_by(fund_id=fund_id).first()
+        if fund is None:
+            raise ValueError(f'Infrastructure fund not found: {fund_id}')
+        assets = session.query(InfraAsset).all()
+        investments = session.query(InfraFundInvestment).filter_by(
+            fund_id=fund_id).all()
+
+    breakdown = asset_nav_breakdown(engine, fund_id, quarter)
+    if breakdown.empty:
+        raise ValueError(
+            f'No asset NAV rows for {fund_id} at {quarter}')
+    nav_map = dict(zip(breakdown['asset_id'], breakdown['nav_eur']))
+
+    asset_map = {a.asset_id: a for a in assets}
+    rows = []
+    for inv in investments:
+        a = asset_map.get(inv.asset_id)
+        rows.append({
+            'asset_name': a.asset_name if a else inv.asset_id,
+            'sector': a.sector if a else None,
+            'sub_type': a.sub_type if a else None,
+            'country': a.country if a else None,
+            'concession_end': a.concession_end if a else None,
+            'ownership_pct': inv.ownership_pct,
+            'drawn_equity_eur': inv.drawn_equity,
+            'appraised_equity_eur': nav_map.get(inv.asset_id, 0.0),
+        })
+    out = pd.DataFrame(rows)
+    total_nav = float(out['appraised_equity_eur'].sum())
+    out['nav_pct'] = out['appraised_equity_eur'] / total_nav * 100
+    out = out.sort_values('appraised_equity_eur',
+                          ascending=False).reset_index(drop=True)
+
+    metadata = pd.DataFrame([
+        {'field': 'Fund name', 'value': fund.fund_name},
+        {'field': 'Vintage year', 'value': str(fund.vintage_year)},
+        {'field': 'Fund life', 'value': f'{fund.fund_life_years} years'},
+        {'field': 'Target size',
+         'value': f'EUR {fund.target_size_eur / 1e6:,.0f}M'},
+        {'field': 'Committed capital',
+         'value': f'EUR {fund.committed_eur / 1e6:,.0f}M'},
+        {'field': 'Drawn capital',
+         'value': (f'EUR {fund.drawn_eur / 1e6:,.0f}M  '
+                   f'({fund.drawn_eur / fund.committed_eur * 100:.1f}% '
+                   'of committed)')},
+        {'field': 'Currency', 'value': fund.currency},
+        {'field': 'Domicile', 'value': fund.domicile},
+        {'field': 'AIFMD classification',
+         'value': fund.aifmd_classification},
+    ])
+    return {
+        'fund_metadata': metadata,
+        'assets': out,
+        'total_nav_eur': total_nav,
+        'total_drawn_eur': float(out['drawn_equity_eur'].sum()),
+    }
+
+
+def covenant_monitor(engine: sa.Engine, fund_id: str, metric: str,
+                     n_quarters: int = 12,
+                     watch_headroom_pct: float = 0.10) -> pd.DataFrame:
+    """Combined per-asset covenant monitor for DSCR or LTV.
+
+    One row per asset with the latest actual, covenant, headroom,
+    headroom %, breach count over the window, trend, waiver flag,
+    status ('Breach' / 'Watch' / 'OK'), and the metric history lists
+    used by the display sparklines. DSCR breaches sit below covenant;
+    LTV breaches sit above covenant.
+    """
+    if metric not in ('dscr', 'ltv'):
+        raise ValueError(f"metric must be 'dscr' or 'ltv', got {metric!r}")
+    profile_fn = dscr_profile if metric == 'dscr' else ltv_profile
+    metric_col = f'{metric}_actual'
+    covenant_col = f'{metric}_covenant'
+    breach_col = f'{metric}_breach'
+
+    with Session(engine) as session:
+        asset_ids = [inv.asset_id for inv in
+                     session.query(InfraFundInvestment).filter_by(
+                         fund_id=fund_id).all()]
+        asset_names = {a.asset_id: a.asset_name
+                       for a in session.query(InfraAsset).all()}
+    if not asset_ids:
+        raise ValueError(f'No infrastructure investments for {fund_id}')
+
+    rows = []
+    for asset_id in asset_ids:
+        df = profile_fn(engine, asset_id)
+        if df.empty:
+            continue
+        df = df.sort_values('date').tail(n_quarters)
+        latest = float(df[metric_col].iloc[-1])
+        cov = float(df[covenant_col].iloc[-1])
+        headroom = (latest - cov) if metric == 'dscr' else (cov - latest)
+        headroom_pct = headroom / cov if cov else float('nan')
+        breach = bool(df[breach_col].iloc[-1])
+        status = ('Breach' if breach
+                  else 'Watch' if headroom_pct < watch_headroom_pct
+                  else 'OK')
+        rows.append({
+            'asset_name': asset_names.get(asset_id, asset_id),
+            'actual': latest,
+            'covenant': cov,
+            'headroom': headroom,
+            'headroom_pct': headroom_pct * 100,
+            'breach_count': int(df[breach_col].sum()),
+            'trend': df['trend'].iloc[-1],
+            'waiver': bool(df['waiver_granted'].any()),
+            'status': status,
+            'history': df[metric_col].astype(float).tolist(),
+            'breach_history': df[breach_col].astype(bool).tolist(),
+        })
+    return pd.DataFrame(rows)
+
+
+def discount_rate_movement(engine: sa.Engine, fund_id: str, quarter: str,
+                           flag_threshold_bps: float = 50.0) -> pd.DataFrame:
+    """Quarter-on-quarter appraiser discount-rate movement per asset.
+
+    Compares the requested quarter with the immediately preceding
+    valuation date in the data. Movements beyond flag_threshold_bps
+    (absolute) are flagged for risk committee review.
+    """
+    with Session(engine) as session:
+        reports = session.query(InfraValuationReport).filter(
+            InfraValuationReport.fund_id == fund_id,
+            InfraValuationReport.valuation_date <= quarter,
+        ).order_by(InfraValuationReport.valuation_date).all()
+        asset_names = {a.asset_id: a.asset_name
+                       for a in session.query(InfraAsset).all()}
+
+    dates = sorted({r.valuation_date for r in reports})
+    if quarter not in dates or len(dates) < 2:
+        raise ValueError(
+            f'Need two valuation dates up to {quarter} for {fund_id}')
+    prev_quarter = dates[-2]
+
+    curr = {r.asset_id: r for r in reports if r.valuation_date == quarter}
+    prev = {r.asset_id: r for r in reports
+            if r.valuation_date == prev_quarter}
+    rows = []
+    for aid, r in sorted(curr.items()):
+        p = prev.get(aid)
+        dr_prev = p.discount_rate if p else None
+        chg_bps = ((r.discount_rate - dr_prev) * 10_000
+                   if dr_prev is not None else None)
+        rows.append({
+            'asset_name': asset_names.get(aid, aid),
+            'dr_prev': dr_prev,
+            'dr_curr': r.discount_rate,
+            'dr_chg_bps': chg_bps,
+            'inflation_assumption': r.inflation_assumption,
+            'flagged': (abs(chg_bps) > flag_threshold_bps
+                        if chg_bps is not None else False),
+        })
+    out = pd.DataFrame(rows)
+    out.attrs['prev_quarter'] = prev_quarter
+    out.attrs['quarter'] = quarter
+    out.attrs['flag_threshold_bps'] = flag_threshold_bps
+    return out
+
+
+def concentration_detail(engine: sa.Engine, fund_id: str,
+                         quarter: str) -> dict:
+    """Country, sub-type, and sector concentration views.
+
+    Sector view reuses concentration_by_sector (including its internal
+    40% NAV flag).
+    """
+    breakdown = asset_nav_breakdown(engine, fund_id, quarter)
+    if breakdown.empty:
+        raise ValueError(f'No asset NAV rows for {fund_id} at {quarter}')
+    total = breakdown['nav_eur'].sum()
+
+    def _group(col: str) -> pd.DataFrame:
+        out = (breakdown.groupby(col)['nav_eur'].sum()
+               .sort_values(ascending=False).reset_index())
+        out['nav_pct'] = out['nav_eur'] / total * 100
+        return out
+
+    return {
+        'country': _group('country'),
+        'sub_type': _group('sub_type'),
+        'sector': concentration_by_sector(engine, fund_id, quarter),
+    }
+
+
+def infra_quarterly_cashflow_frame(engine: sa.Engine,
+                                   fund_id: str) -> pd.DataFrame:
+    """Quarterly capital calls, fees, distributions, NCF, CNCF, and DPI."""
+    with Session(engine) as session:
+        cfs = session.query(InfraCashFlow).filter_by(fund_id=fund_id).all()
+    if not cfs:
+        raise ValueError(f'No infrastructure cash flows for {fund_id}')
+
+    df = pd.DataFrame([{
+        'quarter': (pd.Timestamp(c.cash_flow_date)
+                    .to_period('Q').to_timestamp('Q')),
+        'flow_type': c.flow_type,
+        'amount_eur': c.amount_eur,
+    } for c in cfs])
+
+    calls = (df[df['flow_type'] == 'capital_call']
+             .groupby('quarter')['amount_eur'].sum().abs().rename('calls'))
+    fees = (df[df['flow_type'] == 'management_fee']
+            .groupby('quarter')['amount_eur'].sum().abs().rename('fees'))
+    dist = (df[df['flow_type'] == 'distribution']
+            .groupby('quarter')['amount_eur'].sum().rename('distributions'))
+
+    quarters = calls.index.union(fees.index).union(dist.index)
+    out = (pd.DataFrame(index=quarters)
+           .join(calls).join(fees).join(dist).fillna(0.0).sort_index())
+    out.index.name = 'quarter'
+    out['ncf'] = out['distributions'] - out['calls'] - out['fees']
+    out['cncf'] = out['ncf'].cumsum()
+    out['cum_calls'] = out['calls'].cumsum()
+    out['cum_dist'] = out['distributions'].cumsum()
+    out['dpi'] = out['cum_dist'] / out['cum_calls'].replace(0, float('nan'))
+    return out
+
+
+def infra_stress_summary(engine: sa.Engine, fund_id: str,
+                         scenarios: list[dict]) -> dict:
+    """Run the documented valuation-input stress scenarios.
+
+    Each scenario dict needs name, discount_rate_shock_bps, and
+    inflation_shock_pct (policy-migrated notebook assumptions).
+
+    Returns dict with keys: summary (DataFrame), results (name -> full
+    stress_nav result), base_nav_eur.
+    """
+    if not scenarios:
+        raise ValueError('No stress scenarios provided')
+    required = {'name', 'discount_rate_shock_bps', 'inflation_shock_pct'}
+    results = {}
+    for scen in scenarios:
+        missing = required - set(scen)
+        if missing:
+            raise ValueError(
+                f'Stress scenario missing fields: {sorted(missing)}')
+        results[scen['name']] = stress_nav(
+            engine, fund_id,
+            scen['discount_rate_shock_bps'],
+            scen['inflation_shock_pct'])
+
+    summary = pd.DataFrame([{
+        'scenario': name,
+        'base_nav_eur': res['base_nav'],
+        'stressed_nav_eur': res['stressed_nav'],
+        'nav_change_eur': res['nav_change'],
+        'nav_change_pct': res['nav_change_pct'],
+    } for name, res in results.items()])
+    return {
+        'summary': summary,
+        'results': results,
+        'base_nav_eur': float(summary['base_nav_eur'].iloc[0]),
+    }
