@@ -21,7 +21,7 @@ Key fund characteristics used in the notebook:
 * Fund life: 10 years
 * Main sectors: technology, healthcare, industrials, consumer, energy transition
 * Valuation basis: quarterly NAV appraisals
-* Main monitoring indicators: IRR, MOIC, DPI, RVPI, PME, unfunded commitments, capital calls, valuation bridge, sector exposure, and selected sustainability indicators
+* Main monitoring indicators: portfolio company appraisals, covenant headroom, IRR, DPI, RVPI, TVPI, J-curve, exit waterfalls, fund cash management, value bridge, unfunded commitments, funding liquidity, PME, NAV stress scenarios, and selected sustainability indicators
 
 
 ## Fund Data Structure
@@ -97,10 +97,6 @@ Direct PE valuations are quarterly and depend on appraiser judgement, company fi
 
 Valuation risk is therefore treated as model and appraisal risk, distinct from market risk in liquid portfolios.
 
-
-**Move to PE notes:**
-
-```markdown
 ## J-Curve Analysis
 
 The J-curve illustrates the typical cash-flow pattern of a PE fund. Capital is called early to fund investments, fees, and expenses, which creates negative cumulative net cash flow in the first years.
@@ -112,6 +108,7 @@ Key metrics:
 ```text
 Net cash flow = distributions - capital called
 Cumulative net cash flow = cumulative distributions - cumulative capital called
+```
 
 ## Exit Waterfall
 
@@ -127,6 +124,7 @@ Waterfall order:
 4. Carried-interest split
 
 This structure supports the notebook output by showing how gross exit proceeds translate into LP and GP economics.
+
 ## Fund Cash Management and Subscription Credit Facility
 
 The simulated fund uses two treasury tools: a cash reserve and a subscription credit facility.
@@ -145,6 +143,40 @@ In the notebook, the facility affects:
 
 The facility is treated as fund-level treasury management, not as portfolio-company leverage.
 
+## Commitments and Funding Liquidity
+
+For this closed-ended PE fund, the notebook treats liquidity risk as funding liquidity rather than redemption liquidity.
+
+The commitment liquidity section monitors:
+
+* committed capital
+* drawn capital
+* unfunded commitments
+* cash balance
+* subscription-line drawn amount, limit, and headroom
+* trailing-12-month distributions, capital calls, and management fees
+* coverage ratio
+* accelerated capital-call stress and shortfall
+
+The coverage ratio compares cash, subscription-line headroom, and trailing-12-month distributions against trailing-12-month calls and fees. The capital-call stress assumes an accelerated drawdown of the documented share of unfunded commitments.
+
+The closed-ended liquidity bucket table confirms that the asset side sits in the `> 1 year` bucket by construction. It is not an open-ended redemption coverage test.
+
+## PME Benchmark
+
+The notebook uses a Long-Nickels Public Market Equivalent (PME) comparison against the Euro Stoxx 50 (`SX5E Index`).
+
+Each PE capital call is replicated as an index purchase and each distribution as an index sale. The residual replicated index portfolio becomes the PME terminal NAV.
+
+Key PME outputs are:
+
+* PE IRR
+* PME IRR
+* alpha, defined as PE IRR minus PME IRR
+* PME multiple
+* PME terminal NAV
+* actual PE NAV
+
 ## Return Attribution: Value Bridge
 
 The value bridge explains how equity value changed between entry and current valuation or exit.
@@ -161,6 +193,22 @@ This distinction helps separate operational performance from valuation effects a
 
 For a buyout fund, EBITDA growth and deleveraging are usually treated as operating or execution-driven value creation. Multiple expansion is more market-sensitive because it depends on valuation conditions at entry and exit.
 
+The notebook shows reconciliation gaps rather than suppressing them. For unrealised companies, appraised NAV can include DCF or growth premia outside the EV/EBITDA bridge.
+
+## PE Stress Testing
+
+The stress testing section focuses on valuation sensitivity, not funding liquidity. Funding-liquidity stress is covered in the commitments and funding liquidity section.
+
+The PE NAV stress scenarios used in the notebook are:
+
+* uniform NAV markdown on active companies
+* exit-multiple compression
+* revenue or EBITDA stress
+* technology sector concentration shock
+* 2008 GFC proxy markdown
+
+The results are shown both by portfolio company and at fund level.
+
 ## ESG Risk Indicators
 
 PE ESG data is assessed at portfolio-company level rather than by listed ISIN.
@@ -171,3 +219,14 @@ The `esg_reporter` column identifies the data source, such as a third-party asse
 
 For PE portfolio companies, ESG indicators should be treated as sustainability-risk inputs unless they are explicitly mapped to SFDR concepts such as Article 6, Article 8, Article 9, PAIs, pre-contractual disclosures, or periodic disclosures.
 
+## Annex IV Reporting Context
+
+For this simulated closed-ended PE AIF, Annex IV-style reporting inputs are linked to fund identity, strategy, leverage, sector exposure, country exposure, investment stage, top positions, performance, and AIFMD II-style disclosure fields.
+
+Notebook-specific interpretation points:
+
+* only fund-level borrowing, such as the subscription line, enters the AIFMD leverage calculation
+* portfolio company debt is treated as ring-fenced at SPV level
+* PE exposures are reported by sector, country, and investment stage on cost basis
+* unfunded commitments are disclosed separately from NAV and leverage
+* redemption-frequency and liquidity-duration fields are shown as not applicable for the closed-ended structure

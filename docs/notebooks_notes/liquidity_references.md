@@ -2,6 +2,12 @@
 
 This note supports the liquidity management notebook. It explains the calibration inputs used to build the dynamic redemption path and how those inputs differ from the RMP redemption shocks.
 
+The primary notebook using this note is:
+
+```text
+notebooks/liquidity_management/liquidity_management.ipynb
+```
+
 ## 1. RMP redemption shocks and calibration inputs
 
 The liquidity notebook uses two different redemption inputs.
@@ -95,3 +101,32 @@ The dynamic redemption path is not a monthly extension of the RMP redemption sho
 RMP redemption shocks are point-in-time policy scenarios. Calibration inputs define investor-type behaviour used in the dynamic path simulation.
 
 The path is then used to assess how liquidity coverage, deferred redemptions and LMT triggers evolve over time.
+
+## 7. Notebook section map
+
+The liquidity notebook separates the workflow into the following layers:
+
+| Notebook section | Purpose |
+| ---------------- | ------- |
+| Fund liquidity terms and policy inputs | Loads fund profile, redemption terms, liquidity policy settings, and monitoring parameters |
+| Portfolio liquidity profile | Estimates position liquidation timelines and groups holdings into liquidity buckets |
+| Investor base and redemption scenario inputs | Loads investor registry data, investor concentration, RMP shocks, and calibration assumptions |
+| Point-in-time redemption stress | Applies RMP redemption shocks to valuation-date NAV and compares the demand with available liquid assets |
+| Dynamic redemption path before LMT effects | Simulates raw monthly redemption demand without gates, swing pricing, or suspension mechanics |
+| Dynamic redemption path after LMTs | Applies LMT settings and shows paid amounts, deferred amounts, backlog, and trigger behaviour |
+
+The notebook exports generated outputs to:
+
+```text
+fig/UCITS_Balanced_liquidity
+```
+
+## 8. Interpretation boundary
+
+The point-in-time redemption stress and the dynamic path answer different questions.
+
+Point-in-time stress asks whether the fund can meet a defined redemption shock at the valuation date.
+
+The dynamic path asks how redemption pressure could evolve over future months when investor-type behaviour assumptions and LMT mechanics are applied.
+
+The dynamic path should therefore be read as a simulation layer for LMT mechanics, not as a replacement for the RMP point-in-time stress scenarios.

@@ -82,6 +82,10 @@ Current pipelines:
 fixed_position_var.py           # VaR pipeline for position-based funds
 liquidity_policy.py             # Liquidity profiling and calibration workflow
 lmt_trigger_analysis.py         # LMT trigger evaluation for UCITS
+pe_buyout_workflow.py           # PE buyout workflow orchestration
+infrastructure_workflow.py      # Infrastructure workflow orchestration
+private_debt_workflow.py        # Private debt workflow orchestration
+real_estate_workflow.py         # Real estate sleeve workflow orchestration
 validate.py                     # Pipeline input validation and data quality checks
 ```
 
@@ -113,8 +117,6 @@ Current modules:
 ```text
 database.py                 # SQLAlchemy ORM models and DB creation
 setup_db.py                 # Idempotent database initialization
-load_fund_metadata.py       # Fund metadata loading from reference data
-load_positions.py           # Position data loading from Excel
 enrichment.py               # Position enrichment (Bloomberg sensitivities, ESG)
 mock_bloomberg.py           # Simulated market data and sensitivities
 generate_positions.py       # Generate position Excel files for liquid funds
@@ -144,6 +146,8 @@ Risk aggregation, compliance orchestration, and asset-class-specific workflows.
 **Asset-class helpers:**
 - `pe_utils.py` — private equity NAV projection, cash flows, covenant analysis
 - `infra_utils.py` — infrastructure covenant monitoring, refinancing risk
+- `private_debt_utils.py` — private debt credit profile, maturity, and borrower stress helpers
+- `real_estate_utils.py` — real estate sleeve, property, tenant, and LTV helpers
 - `esg_utils.py` — ESG score aggregation, SFDR PAI metrics
 
 **Leverage monitoring:**
@@ -170,6 +174,11 @@ plot_var_backtest()
 plot_liquidity_buckets()
 plot_attribution()
 annex_iv_display.py         # Annex IV report formatting
+pe_buyout_display.py        # PE buyout notebook display helpers
+infrastructure_display.py   # Infrastructure notebook display helpers
+private_debt_display.py     # Private debt notebook display helpers
+real_estate_display.py      # Real estate notebook display helpers
+liquidity_calibration_display.py  # Liquidity calibration and LMT display helpers
 ```
 
 Display functions take computed results and render them as styled HTML tables or charts for notebooks.
@@ -219,10 +228,16 @@ notebooks/
 - How data flows into the computation layer
 
 **`funds/`** contains fund-level risk monitoring notebooks organized by fund ID (not regulatory category). Each notebook demonstrates:
-- Daily risk snapshot for a fund
-- VaR, liquidity, and leverage monitoring (where applicable)
+- A point-in-time risk view for a fund
+- VaR, liquidity, leverage, covenant, funding-liquidity, or asset-specific monitoring where applicable
 - Stress testing and scenario analysis
 - Regulatory compliance checks (UCITS or AIFMD)
+
+The canonical liquidity management notebook is:
+
+```text
+notebooks/liquidity_management/liquidity_management.ipynb
+```
 
 **`reports/`** contains governance and reporting outputs:
 - Board risk report
@@ -484,11 +499,13 @@ AIFM_HedgeFund
 AIFM_PrivateDebt
 ```
 
-`AIFM_RealEstate` is currently a mixed fund and should not be blindly treated as a pure liquid position-based fund. It may eventually need a sleeve-based workflow.
+`AIFM_RealEstate` is currently a mixed fund and should not be blindly treated as a pure liquid position-based fund. The current notebook uses a sleeve-based workflow for direct properties, listed REITs, FX hedge, and cash.
 
 UCITS may reuse computation functions, but UCITS regulatory interpretation must remain separate.
 
 Private equity and infrastructure have different data models and should not be forced into a standard VaR-based pipeline.
+
+`AIFM_PrivateDebt` can use position-style credit monitoring, but it is treated as closed-ended for liquidity and investor-concentration interpretation.
 
 The following funds are treated as closed-ended for fund-level policy configuration:
 
@@ -496,6 +513,7 @@ The following funds are treated as closed-ended for fund-level policy configurat
 AIFM_PE_Buyout
 AIFM_Infra_Core
 AIFM_RealEstate
+AIFM_PrivateDebt
 ```
 
 ## Reporting and disclosure distinction

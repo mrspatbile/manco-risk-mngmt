@@ -64,6 +64,7 @@ These measures answer different questions:
 
 Gross and commitment exposure are exposure measures, not NAV reconciliation tools.
 
+Each fund notebook defines whether liquidity and redemption sections apply to that fund structure. Open-ended and daily-dealing workflows may include redemption stress and LMT analysis. Closed-ended private-asset workflows may instead exclude redemption sections and focus on funding liquidity, covenant stress, asset-level cash flows, or other fund-specific risk indicators.
 
 
 

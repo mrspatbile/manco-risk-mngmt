@@ -96,11 +96,23 @@ Recommended entry points:
 
 | Area | Notebook | Generated outputs |
 | --- | --- | --- |
-| Data workflow | [`notebooks/data_workflows/02_operational_checks.ipynb`](notebooks/data_workflows/02_operational_checks.ipynb) | database and enrichment checks |
+| Data layer workflow | [`notebooks/data_workflows/01_data_layer_workflow.ipynb`](notebooks/data_workflows/01_data_layer_workflow.ipynb) | database, reference data, market data and enrichment context |
+| Operational checks | [`notebooks/data_workflows/02_operational_checks.ipynb`](notebooks/data_workflows/02_operational_checks.ipynb) | database and enrichment checks |
 | Hedge fund risk monitoring | [`notebooks/funds/aifm_hedge_fund.ipynb`](notebooks/funds/aifm_hedge_fund.ipynb) | [`fig/AIFM_HedgeFund`](fig/AIFM_HedgeFund) |
 | UCITS balanced workflow | [`notebooks/funds/ucits_balanced.ipynb`](notebooks/funds/ucits_balanced.ipynb) | [`fig/UCITS_Balanced`](fig/UCITS_Balanced) |
+| PE buyout workflow | [`notebooks/funds/aifm_pe_buyout.ipynb`](notebooks/funds/aifm_pe_buyout.ipynb) | [`fig/AIFM_PE_Buyout`](fig/AIFM_PE_Buyout) |
+| Infrastructure workflow | [`notebooks/funds/aifm_infra_fund.ipynb`](notebooks/funds/aifm_infra_fund.ipynb) | [`fig/AIFM_Infra_Core`](fig/AIFM_Infra_Core) |
+| Private debt workflow | [`notebooks/funds/aifm_private_debt.ipynb`](notebooks/funds/aifm_private_debt.ipynb) | [`fig/AIFM_PrivateDebt`](fig/AIFM_PrivateDebt) |
+| Real estate workflow | [`notebooks/funds/aifm_real_estate.ipynb`](notebooks/funds/aifm_real_estate.ipynb) | [`fig/AIFM_RealEstate`](fig/AIFM_RealEstate) |
 | Liquidity management tools | [`notebooks/liquidity_management/liquidity_management.ipynb`](notebooks/liquidity_management/liquidity_management.ipynb) | [`fig/UCITS_Balanced_liquidity`](fig/UCITS_Balanced_liquidity) |
 | Board risk report | [`notebooks/reports/board_risk_report.ipynb`](notebooks/reports/board_risk_report.ipynb) | board report output |
+| UCITS investor disclosure | [`notebooks/reports/ucits_priips_kid.ipynb`](notebooks/reports/ucits_priips_kid.ipynb) | UCITS / PRIIPs-style internal disclosure workflow |
+
+The canonical liquidity management notebook is:
+
+```text
+notebooks/liquidity_management/liquidity_management.ipynb
+```
 
 All notebooks use the static valuation date:
 
@@ -230,7 +242,6 @@ profiles or capital structure in `generate_infra_fund.py`, rerun
 The Example baked in the infra portfolio has "intentionally" 2 designed breaches: 
 - INFRA_003 Q2 2020 DSCR
 - INFRA_007 Q3 2023 LTV
-
 
 
 

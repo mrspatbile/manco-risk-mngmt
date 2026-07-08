@@ -1,9 +1,3 @@
-Use this for:
-
-```text
-docs/notebooks_notes/real_estate.md
-```
-
 # AIFM Real Estate Fund Notes
 
 This note collects supporting fund context, methodology notes, and interpretation guidance for the `AIFM_RealEstate` notebook.
@@ -25,7 +19,7 @@ Key fund characteristics used in the notebook:
 * Main property types: office, logistics, retail, residential
 * Exposure type: direct property investments and listed real estate securities
 * Valuation basis: quarterly appraiser inputs for direct properties and daily market prices for listed REITs
-* Main monitoring indicators: LTV, rental yield, vacancy, effective yield, property value stress, rental stress, tenant concentration, liquidity profile by sleeve, leverage, and ESG indicators
+* Main monitoring indicators: sleeve separation, LTV, rental yield, vacancy, effective yield, property value stress, rental stress, tenant concentration, tenant default stress, leverage, and ESG indicators
 
 ## Real Estate Exposure Model
 
@@ -102,34 +96,26 @@ For listed REITs and liquid exposures, stress P&L may use first-order sensitivit
 
 A rate shock can affect listed REITs through market sensitivity and direct properties through valuation yields or cap-rate expansion. If the current function only applies duration sensitivity to bonds or REITs, direct-property rate transmission should be treated as only partly captured.
 
-## Liquidity Profile
+## Sleeve and Liquidity Interpretation
 
-The liquidity profile should be interpreted by sleeve.
+The notebook does not run open-ended redemption monitoring or an asset-liquidity bucket workflow for this closed-ended fund.
 
-Direct properties are illiquid assets. They should not be treated as ADV-driven liquid positions. Their liquidity depends on property sale processes, market depth, valuation conditions, legal transfer process, debt arrangements, and asset-specific factors.
+Instead, liquidity interpretation follows the sleeve separation shown in the notebook:
 
-Listed REITs may use position-style liquidity measures where daily market data and trading volume are available.
+* direct properties are appraisal-based and illiquid
+* listed REITs are daily priced and may support liquid-sleeve monitoring
+* cash is the base-currency liquidity buffer
+* FX hedges may create collateral, counterparty, or settlement liquidity needs
 
-Cash is treated as the liquidity buffer.
+Direct properties should not be treated as ADV-driven liquid positions. Their liquidity depends on property sale processes, market depth, valuation conditions, legal transfer process, debt arrangements, and asset-specific factors.
 
-FX hedges should be monitored separately where relevant because they may create collateral, counterparty, or settlement liquidity needs.
+Closed-ended real estate liquidity risk should be read through funding and asset-management pressures such as fund expenses, debt service, refinancing needs, capex requirements, tenant income shortfall, cash-reserve adequacy, and property sale timing.
 
-## Redemption Stress and Closed-Ended Treatment
+## Closed-Ended Treatment
 
-The fund is intended to be treated as closed-ended.
+The fund is treated as closed-ended in the notebook.
 
-Open-ended redemption stress does not fully fit this structure. If the notebook includes redemption-style scenarios, they should be treated as legacy or review sections until replaced or complemented by real estate-specific liquidity analysis.
-
-For a closed-ended real estate AIF, liquidity stress should focus more on:
-
-* fund expenses
-* debt service
-* refinancing needs
-* capex requirements
-* tenant income shortfall
-* cash-reserve adequacy
-* asset sale timing
-* liquidity support from listed REITs and cash
+There is no redemption stress section, and investor concentration is not translated into a redemption scenario. This is intentional: the notebook replaces open-ended redemption analytics with real-estate-specific monitoring, including sleeve separation, LTV covenant stress, tenant concentration, and tenant default stress.
 
 ## Investor Concentration
 
@@ -154,23 +140,6 @@ A major tenant default or vacancy can reduce rental income and impair property v
 
 Tenant register data is simulated in this project. In a fuller workflow, tenant exposure would be based on executed lease data, rent schedules, lease maturity, break clauses, rent indexation, security deposits, and vacancy assumptions.
 
-## Combined Stress
-
-The current combined stress includes a property value shock and a redemption demand.
-
-For a closed-ended real estate fund, the redemption demand component should be reviewed. A better future combined stress would focus on real estate-specific pressure, such as:
-
-* property value decline
-* tenant default
-* vacancy increase
-* refinancing stress
-* debt service pressure
-* cash-flow shortfall
-* capex needs
-* limited liquidity from direct property sales
-
-This should be handled in a later real estate-specific refactor.
-
 ## ESG Risk Indicators
 
 The notebook monitors ESG indicators at portfolio level using NAV-weighted averages.
@@ -183,7 +152,7 @@ ESG scores should be treated as sustainability-risk inputs unless they are expli
 
 ## Annex IV Reporting Context
 
-For this simulated real estate AIF, Annex IV-style reporting inputs are linked to fund structure, leverage profile, liquidity profile, investor concentration, principal exposures, and main risk measures.
+For this simulated real estate AIF, Annex IV-style reporting inputs are linked to fund structure, portfolio breakdown, leverage detail, principal exposures, and main risk measures.
 
 The real-estate-specific indicators used in the notebook include:
 
@@ -191,7 +160,7 @@ The real-estate-specific indicators used in the notebook include:
 * property-level LTV
 * direct-property exposure
 * listed REIT exposure
-* liquidity profile by sleeve
+* sleeve separation
 * investor concentration
 * tenant concentration
 * property value stress
@@ -199,5 +168,7 @@ The real-estate-specific indicators used in the notebook include:
 * ESG indicators
 
 Direct properties, listed REITs, cash, and FX hedges should be distinguished when interpreting reporting output. The direct-property sleeve is appraisal-based and illiquid, while listed REITs and cash may support liquid-sleeve monitoring.
+
+For this closed-ended fund, the notebook excludes liquidity and redemption sections from the Annex IV-style output. Investor and tenant concentration are monitored separately from the fund-level registers.
 
 The notebook treats Annex IV-style outputs as reporting inputs generated from the monitoring workflow.
