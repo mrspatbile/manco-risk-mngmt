@@ -1423,7 +1423,8 @@ def display_redemption_stress(
     nav,
     risk_df_liq,
     valuation_date: str | None = None,
-    export_id: str | None = None
+    export_id: str | None = None,
+    folder_suffix: str | None = '_liquidity',
 ):
     """
     Compute and display redemption stress scenarios.
@@ -1442,6 +1443,10 @@ def display_redemption_stress(
         Positions with liquidity_bucket column
     export_id : str or None, default None
         If provided, save rendered HTML as PNG
+    folder_suffix : str or None, default '_liquidity'
+        Suffix appended to the figure output folder when exporting.
+        For example, '_liquidity' saves to fig/<fund_id>_liquidity.
+        Use None to save to fig/<fund_id>.
     """
     from fund_risk_workflow.risk.risk_utils import redemption_stress
     from fund_risk_workflow.data.reference_data import load_investor_base_dict
@@ -1553,7 +1558,7 @@ def display_redemption_stress(
         from fund_risk_workflow.ui.nb_utils import _slugify, save_html_as_png
         title_slug = _slugify('Redemption Stress')
         filename = f'{export_id}_{title_slug}'
-        save_html_as_png(html, fund_id, filename, folder_suffix='_liquidity')
+        save_html_as_png(html, fund_id, filename, folder_suffix=folder_suffix)
 
 
 def display_combined_stress_mkt_plus_liq(
