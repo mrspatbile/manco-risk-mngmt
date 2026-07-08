@@ -8,7 +8,14 @@ from fund_risk_workflow.ui.plot_style import C, ACCENT
 from fund_risk_workflow.ui.nb_utils import save_fig
 
 
-def plot_liquidity_profile(bucket_df, fund_id, metric='pct_nav_abs', valuation_date: str | None = None, export_id: str | None = None):
+def plot_liquidity_profile(
+    bucket_df,
+    fund_id,
+    metric='pct_nav_abs',
+    valuation_date: str | None = None,
+    export_id: str | None = None,
+    folder_suffix: str | None = '_liquidity',
+):
     """
     Plot liquidity profile — exposure by bucket with value labels.
 
@@ -25,6 +32,10 @@ def plot_liquidity_profile(bucket_df, fund_id, metric='pct_nav_abs', valuation_d
         Column to plot ('pct_nav_abs' or 'pct_nav_signed'). Default 'pct_nav_abs'
     valuation_date : str, optional
         Valuation date for subtitle
+    folder_suffix : str or None, default '_liquidity'
+        Suffix appended to the figure output folder when exporting.
+        For example, '_liquidity' saves to fig/<fund_id>_liquidity.
+        Use None to save to fig/<fund_id>.
 
     Returns
     -------
@@ -87,7 +98,8 @@ def plot_liquidity_profile(bucket_df, fund_id, metric='pct_nav_abs', valuation_d
         from fund_risk_workflow.ui.nb_utils import _slugify, _get_project_root
         title_slug = _slugify('Liquidity profile')
         filename = f'{export_id}_{title_slug}'
-        out_dir = _get_project_root() / 'fig' / f'{fund_id}_liquidity'
+        folder_name = fund_id + (folder_suffix or '')
+        out_dir = _get_project_root() / 'fig' / folder_name
         out_dir.mkdir(parents=True, exist_ok=True)
         path = out_dir / f'{filename}.png'
         fig.savefig(path, dpi=150, bbox_inches='tight', facecolor=fig.get_facecolor())
